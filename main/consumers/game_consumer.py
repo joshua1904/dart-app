@@ -38,13 +38,17 @@ class GameConsumer(WebsocketConsumer):
             max_players=self.game.max_players,
             online=self.game.online,
             status=1,
+            session=self.game.session
         )
         new_game.save()
         for player in self.game.game_players.all():
+            possible_new_rank = player.rank - 1
+            new_rank = possible_new_rank if possible_new_rank != 0 else self.game.max_players
+
             MultiplayerPlayer.objects.create(
                 game=new_game,
                 player=player.player,
-                rank=player.rank,
+                rank=new_rank,
                 guest_name=player.guest_name,
             )
         logger.info(f"New game created: {new_game.id}")

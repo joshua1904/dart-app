@@ -26,6 +26,13 @@ class Round(models.Model):
 
 
 # multiplayer
+
+class Session(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+
+    @property
+    def game_count(self):
+        return self.games.all().count()
 class MultiplayerGame(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     date = models.DateField(default=timezone.now)
@@ -43,6 +50,7 @@ class MultiplayerGame(models.Model):
         null=True,
         blank=True,
     )
+    session = models.ForeignKey('Session', on_delete=models.CASCADE, related_name='games', null=True)
 
 
 class MultiplayerRound(models.Model):

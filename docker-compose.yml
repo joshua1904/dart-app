@@ -1,8 +1,6 @@
-version: "3.9"
-
 services:
   web:
-    image: joshuatewes/dart:latest
+    image: username/dart:latest
     container_name: django_asgi_app
     ports:
       - "8000:8000"
