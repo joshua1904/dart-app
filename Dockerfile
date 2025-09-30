@@ -20,8 +20,5 @@ RUN pip install --no-cache-dir -r requirements.txt
 # Copy project files
 COPY . .
 
-# Collect static files (safe to run here)
-RUN python manage.py collectstatic --noinput
-
 # Run migrations inside CMD (runtime, not build time)
 CMD ["sh", "-c", "python manage.py migrate && daphne -b 0.0.0.0 -p 8000 dart.asgi:application"]
