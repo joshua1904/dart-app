@@ -24,7 +24,6 @@ jobs:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      # 4️⃣ Build and push multi-arch Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -32,9 +31,8 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/dart:latest
-          platforms: linux/amd64,linux/arm64
+          platforms: linux/arm64   # or linux/amd64,linux/arm64 for multi-arch
 
-      # 5️⃣ Deploy via SSH
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -43,18 +41,7 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/dart-app
-
-            # Write .env from secret (if you want GitHub to manage it)
-            echo "$DOTENV_CONTENT" > .env
-
-            # Pull latest code
-            git pull origin master
-
-            # Pull latest Docker image and deploy
+            echo "${{ secrets.ENV }}" > .env
             docker compose pull web
-            docker compose up -d --build
-
-            # Cleanup old images
+            docker compose up -d
             docker system prune -f
-        env:
-          DOTENV_CONTENT: ${{ secrets.ENV }}
