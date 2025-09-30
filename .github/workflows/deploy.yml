@@ -9,18 +9,22 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # 1️⃣ Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      # 2️⃣ Set up Docker Buildx for multi-arch builds
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      # 3️⃣ Log in to DockerHub
       - name: Log in to DockerHub
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
+      # 4️⃣ Build and push multi-arch Docker image
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
@@ -28,7 +32,9 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/dart:latest
+          platforms: linux/amd64,linux/arm64
 
+      # 5️⃣ Deploy via SSH
       - name: Deploy via SSH
         uses: appleboy/ssh-action@v1.0.3
         with:
@@ -37,9 +43,18 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/dart-app
-            # Write .env from secret
-            echo "${{ secrets.ENV }}" > .env
-            # Pull latest image and run
+
+            # Write .env from secret (if you want GitHub to manage it)
+            echo "$DOTENV_CONTENT" > .env
+
+            # Pull latest code
+            git pull origin master
+
+            # Pull latest Docker image and deploy
             docker compose pull web
-            docker compose up -d
+            docker compose up -d --build
+
+            # Cleanup old images
             docker system prune -f
+        env:
+          DOTENV_CONTENT: ${{ secrets.ENV }}
