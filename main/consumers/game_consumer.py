@@ -38,12 +38,14 @@ class GameConsumer(WebsocketConsumer):
             max_players=self.game.max_players,
             online=self.game.online,
             status=1,
-            session=self.game.session
+            session=self.game.session,
         )
         new_game.save()
         for player in self.game.game_players.all():
             possible_new_rank = player.rank - 1
-            new_rank = possible_new_rank if possible_new_rank != 0 else self.game.max_players
+            new_rank = (
+                possible_new_rank if possible_new_rank != 0 else self.game.max_players
+            )
 
             MultiplayerPlayer.objects.create(
                 game=new_game,
@@ -57,7 +59,6 @@ class GameConsumer(WebsocketConsumer):
         async_to_sync(self.channel_layer.group_send)(str(self.game_id), event)
 
     def receive(self, text_data):
-
         data = {}
         # Try JSON first (manual sends)
         try:

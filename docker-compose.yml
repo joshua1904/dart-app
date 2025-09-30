@@ -8,7 +8,8 @@ services:
       - .env   # the server will have this .env, written from GitHub Actions secret
     volumes:
       - static_volume:/app/staticfiles
-      - db_volume:/app/db/
+      - db_volume:/app/db.sqlite3
+
     restart: always
     command: >
       sh -c "python manage.py migrate &&
