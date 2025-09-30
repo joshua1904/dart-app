@@ -37,7 +37,9 @@ jobs:
           key: ${{ secrets.SERVER_SSH_KEY }}
           script: |
             cd ~/dart-app
-            git pull origin main
+            # Write .env from secret
+            echo "${{ secrets.ENV }}" > .env
+            # Pull latest image and run
             docker compose pull web
-            docker compose up -d --build
+            docker compose up -d
             docker system prune -f
