@@ -1,5 +1,8 @@
 services:
   web:
+    build:
+      context: .
+      dockerfile: Dockerfile
     image: username/dart:latest
     container_name: django_asgi_app
     ports:
