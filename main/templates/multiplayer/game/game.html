@@ -3,7 +3,7 @@
 
 {% block title %}Multiplayer Game{% endblock %}
 
-
+{% block header %}{% endblock %}
 {% block content %}
 <div class="row justify-content-center">
     <div id="ws-connection" hx-ext="ws" ws-connect="/ws/{{ game.id }}/">

@@ -55,7 +55,7 @@
         </div>
         <div class="col-4 d-grid">
             <button type="button" class="btn btn-outline-danger btn-lg" data-action="backspace" aria-label="Backspace">
-                <i class="bi bi-backspace me-1"></i>Back
+                <i class="bi bi-backspace me-1"></i>
             </button>
         </div>
     </div>
@@ -76,7 +76,6 @@
             const next = current === '0' ? digit : current + digit;
             input.value = next;
             input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.focus();
             return;
         }
 
@@ -85,7 +84,6 @@
             const next = current.slice(0, -1);
             input.value = next;
             input.dispatchEvent(new Event('input', { bubbles: true }));
-            input.focus();
         }
     });
 })();
