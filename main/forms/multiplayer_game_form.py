@@ -3,7 +3,7 @@ from django import forms
 from main.models import MultiplayerGame
 
 
-class MultiplayerGameForm(forms.ModelForm):
+class MultiplayerGameForm(forms.Form):
     max_players = forms.IntegerField(
         label="Players",
         min_value=1,
@@ -34,7 +34,13 @@ class MultiplayerGameForm(forms.ModelForm):
             }
         ),
     )
-
-    class Meta:
-        model = MultiplayerGame
-        fields = ("max_players", "online", "score")
+    first_to = forms.IntegerField(
+        label="First to",
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "leave empty to play forever",
+            }
+        ),
+        required=False,
+    )

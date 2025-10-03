@@ -30,7 +30,7 @@ class Round(models.Model):
 
 class Session(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-
+    first_to = models.IntegerField(null=True)
     @property
     def game_count(self):
         return self.games.all().count()

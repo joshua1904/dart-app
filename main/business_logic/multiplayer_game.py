@@ -1,11 +1,11 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.db.models import Q, OuterRef, Sum, Avg, Count
+from django.db.models import Sum, Avg
 import logging
 from main.business_logic.utils import get_points_of_round, get_checkout_suggestion
 from main.models import MultiplayerGame, MultiplayerPlayer, MultiplayerRound, Session
 from main.utils import  MultiplayerGameStatus
-
+from collections import defaultdict
 logger = logging.getLogger(__name__)
 def get_game_info(game_id: int):
     game = get_object_or_404(MultiplayerGame, id=game_id)
@@ -99,7 +99,22 @@ def get_needed_rounds(game, player) -> int:
     return game.game_rounds.filter(player=player).count()
 
 
+def get_players_ordered_by_wins(session: Session) -> list:
+    winner_dict = defaultdict(int)
+    for game in session.games.all():
+        if game.winner.player:
+            winner_dict[game.winner.player.username] += 1
+        else:
+            winner_dict[game.winner.guest_name] += 1
+    for player in session.games.first().game_players.all():
+        print(player.player, player.guest_name, player)
+        winner_dict[player.player.username if player.player else player.guest_name] += 0
+    print(winner_dict)
+    return sorted(winner_dict.items(), key=lambda x: x[1], reverse=True)
+    
+    
 def get_ending_context(game) -> dict:
+
     winner_stats = {
         "average_points": get_average_points(game, game.winner),
         "needed_rounds": get_needed_rounds(game, game.winner),
@@ -108,17 +123,26 @@ def get_ending_context(game) -> dict:
         "game": game,
         "winner": game.winner,
         "winner_stats": winner_stats,
+        "players": get_players_ordered_by_wins(game.session),
+        "session_won": game.session.first_to and get_wins(game.session, game.winner) == game.session.first_to,
     }
 
 
 def create_follow_up_game(game: MultiplayerGame) -> MultiplayerGame:
+    # create also new session if session was won
+    session = game.session
+    if game.winner and game.session and game.session.first_to:
+        wins = get_wins(game.session, game.winner)
+        if wins == game.session.first_to:
+            session = Session.objects.create(first_to=game.session.first_to)
+    
     new_game = MultiplayerGame(
         score=game.score,
         creator=game.creator,
         max_players=game.max_players,
         online=game.online,
         status=MultiplayerGameStatus.PROGRESS.value,
-        session=game.session,
+        session=session,
     )
     new_game.save()
     
