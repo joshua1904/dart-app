@@ -1,11 +1,12 @@
+from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
 from django.db.models import Sum, Avg
-
+import logging
 from main.business_logic.utils import get_points_of_round, get_checkout_suggestion
-from main.models import MultiplayerGame, MultiplayerPlayer, MultiplayerRound
-from main.utils import GameStatus
+from main.models import MultiplayerGame, MultiplayerPlayer, MultiplayerRound, Session
+from main.utils import  MultiplayerGameStatus
 
-
+logger = logging.getLogger(__name__)
 def get_game_info(game_id: int):
     game = get_object_or_404(MultiplayerGame, id=game_id)
     return game
@@ -67,7 +68,7 @@ def add_round(game, player, points) -> bool:
     points = get_points_of_round(left_score, points)
     MultiplayerRound(game=game, player=player, points=points).save()
     if left_score == points:
-        game.status = GameStatus.WON.value
+        game.status = MultiplayerGameStatus.FINISHED.value
         game.winner = player
         game.save()
         return True
@@ -94,3 +95,29 @@ def get_ending_context(game) -> dict:
         "winner": game.winner,
         "winner_stats": winner_stats,
     }
+
+
+def create_follow_up_game(game: MultiplayerGame) -> MultiplayerGame:
+    new_game = MultiplayerGame(
+        score=game.score,
+        creator=game.creator,
+        max_players=game.max_players,
+        online=game.online,
+        status=MultiplayerGameStatus.PROGRESS.value,
+        session=game.session,
+    )
+    new_game.save()
+    
+    for player in game.game_players.all():
+        possible_new_rank = player.rank - 1
+        new_rank = (
+            possible_new_rank if possible_new_rank != 0 else game.max_players
+        )
+        MultiplayerPlayer.objects.create(
+            game=new_game,
+            player=player.player,
+            rank=new_rank,
+            guest_name=player.guest_name,
+        )
+        logger.info(f"New game created: {new_game.id}")
+    return new_game

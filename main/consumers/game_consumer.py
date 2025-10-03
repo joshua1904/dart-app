@@ -5,7 +5,7 @@ from main.business_logic.utils import delete_last_round
 from main.models import MultiplayerGame, MultiplayerPlayer
 from django.template.loader import render_to_string
 from urllib.parse import parse_qs
-from main.business_logic.multiplayer_game import get_game_context, get_turn, add_round
+from main.business_logic.multiplayer_game import get_game_context, get_turn, add_round, create_follow_up_game
 import logging
 
 logger = logging.getLogger(__name__)
@@ -33,28 +33,7 @@ class GameConsumer(WebsocketConsumer):
         )
 
     def new_game(self):
-        new_game = MultiplayerGame(
-            score=self.game.score,
-            creator=self.user,
-            max_players=self.game.max_players,
-            online=self.game.online,
-            status=1,
-            session=self.game.session,
-        )
-        new_game.save()
-        for player in self.game.game_players.all():
-            possible_new_rank = player.rank - 1
-            new_rank = (
-                possible_new_rank if possible_new_rank != 0 else self.game.max_players
-            )
-
-            MultiplayerPlayer.objects.create(
-                game=new_game,
-                player=player.player,
-                rank=new_rank,
-                guest_name=player.guest_name,
-            )
-        logger.info(f"New game created: {new_game.id}")
+        new_game = create_follow_up_game(self.game)
         self.create_redirect_all_event(f"/multiplayer/game/{new_game.id}/")
 
     def receive(self, text_data):

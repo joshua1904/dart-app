@@ -7,10 +7,9 @@ def get_points_of_round(left_score: int, points: int) -> int:
         points = 180
     if points < 0:
         points = 0
-
     if left_score - points < 0 or left_score - points == 1:
         points = 0
-    if left_score == points and points not in checkout_map:
+    if (left_score - points) == 0 and points not in checkout_map:
         points = 0
     return points
 
