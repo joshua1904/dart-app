@@ -22,6 +22,7 @@ def get_game_context(game: Game) -> dict:
         "checkout_suggestion": checkout_suggestion,
         "average_score": average_score,
         "total_points_scored": total_points_scored,
+        "progress_percentage": total_points_scored / game.score * 100,
     }
 
 

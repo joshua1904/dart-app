@@ -20,37 +20,46 @@
             </div>
             <div class="card-body text-center">
                 <!-- Progress Stats -->
-                <div class="row g-3 mb-4">
+                <div class="row g-3 mb-2">
                     <div class="col-6">
-                        <div class="p-3 rounded-3 stats-card-rounds">
+                        <div class="p-4 rounded-3 stats-card-rounds">
                             <div class="d-flex align-items-center justify-content-center mb-2">
                         <span class="fw-bold text-primary fs-4">{{average_score}}</span>
                             </div>
                             <small class="text-muted d-block">Average Score</small>
+                            <div class="progress position-relative">
+                                <div class="progress-bar" role="progressbar" style="width: {% widthratio round_count game.rounds 100 %}%;" aria-valuenow="{{round_count}}" aria-valuemin="0" aria-valuemax="{{game.rounds}}"></div>
+                                <div class="position-absolute w-100 text-center" style="top: 50%; transform: translateY(-50%); font-weight: bold; color: #333;">
+                                    {{round_count}}/{{game.rounds}}
+                                </div>
+                              </div>
                           
                         </div>
                     </div>
                     <div class="col-6">
-                        <div class="p-3 rounded-3 stats-card-score">
+                        <div class="p-4 rounded-3 stats-card-score">
                             <div class="d-flex align-items-center justify-content-center mb-2">
                                 <span class="fw-bold text-warning fs-4">{{ current_score_left }}</span>
                             </div>
                             <small class="text-muted d-block">Score Left</small>
-                            
+                            <div class="progress position-relative">
+                                <div class="progress-bar" role="progressbar" style="width: {{progress_percentage}}%;" aria-valuenow="{{current_score_left}}" aria-valuemin="0" aria-valuemax="{{game.score}}"></div>
+                                <div class="position-absolute w-100 text-center" style="top: 50%; transform: translateY(-50%); font-weight: bold; color: #333;">
+                                    {{total_points_scored}}/{{game.score}}
+                                </div>
+                              </div>
                         </div>
                     </div>
-                   
 
 </div>
-                </div>
 
                 <!-- Checkout Suggestion -->
                 {% if checkout_suggestion %}
                 {% include "partials/checkout_suggestion.html" %}
                 {% endif %}
-                
+                </div>
                 <!-- Game Form -->
-                <div class="bg-light rounded-3 p-4">
+                <div class="bg-light rounded-3 p-2">
                     <form method="post" action="" class="needs-validation" novalidate>
                         {% csrf_token %}
                         {% include "partials/point_input.html" %}
