@@ -1,4 +1,4 @@
-from main.constants import checkout_map
+from main.constants import checkout_map, IMPOSSIBLE_POINTS
 from main.models import Game, MultiplayerGame
 
 
@@ -7,9 +7,12 @@ def get_points_of_round(left_score: int, points: int) -> int:
         points = 180
     if points < 0:
         points = 0
-    if left_score - points < 0 or left_score - points == 1:
+    left_score = left_score - points
+    if left_score < 0 or left_score == 1:
         points = 0
-    if (left_score - points) == 0 and points not in checkout_map:
+    if left_score == 0 and points not in checkout_map:
+        points = 0
+    if points in IMPOSSIBLE_POINTS:
         points = 0
     return points
 

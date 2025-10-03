@@ -6,56 +6,73 @@ from main.utils import MultiplayerGameStatus
 from django.contrib.auth.models import User
 
 
-def create_players(game: MultiplayerGame, num_players: int):
-    for i in range(1, num_players + 1):
-        MultiplayerPlayer.objects.create(game=game, rank=i)
-
-class ConstantsTests(TestCase):
+class MultiplayerGameTests(TestCase):
+    
+    def setUp(self):
+        """Set up test data for each test method."""
+        self.user1 = User.objects.create_user(username="testuser1", password="testpass")
+        self.user2 = User.objects.create_user(username="testuser2", password="testpass")
+        
+    def create_game(self, score=100, max_players=1, online=True, status=MultiplayerGameStatus.PROGRESS.value, creator=None):
+        """Helper method to create a multiplayer game with default values."""
+        if creator is None:
+            creator = self.user1
+        return MultiplayerGame.objects.create(
+            score=score,
+            creator=creator,
+            max_players=max_players,
+            online=online,
+            status=status,
+            session=None,
+        )
+    
+    def create_players(self, game: MultiplayerGame, num_players: int):
+        """Helper method to create players for a game."""
+        for i in range(1, num_players + 1):
+            MultiplayerPlayer.objects.create(game=game, rank=i)
+    
+    def get_player(self, game: MultiplayerGame, rank: int):
+        """Helper method to get a player by rank."""
+        return MultiplayerPlayer.objects.get(game=game, rank=rank)
+    
+    def add_round_for_player(self, game: MultiplayerGame, rank: int, points: int):
+        """Helper method to add a round for a specific player."""
+        player = self.get_player(game, rank)
+        return MultiplayerRound.objects.create(game=game, player=player, points=points)
 
     def test_get_turn(self):
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=User.objects.create(username="test"),
-            max_players=10,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 10)
+        """Test that get_turn returns the correct player turn."""
+        game = self.create_game(score=100, max_players=10)
+        self.create_players(game, 10)
+        
         for i in range(1, 11):
             self.assertEqual(get_turn(game), i)
-            MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=i), points=100)
+            self.add_round_for_player(game, i, 100)
       
     def test_get_left_score_after_valid_round(self):
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=User.objects.create(username="test"),
-            max_players=1,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 1)
+        """Test get_left_score calculation after adding rounds."""
+        game = self.create_game(score=100, max_players=1)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        
         # go from 100 to 50 to 30 to 0
-        self.assertEqual(get_left_score(game, MultiplayerPlayer.objects.get(rank=1)), 100)
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=50)
-        self.assertEqual(get_left_score(game, MultiplayerPlayer.objects.get(rank=1)), 50)
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=20)
-        self.assertEqual(get_left_score(game, MultiplayerPlayer.objects.get(rank=1)), 30)
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=30)
-        self.assertEqual(get_left_score(game, MultiplayerPlayer.objects.get(rank=1)), 0)
+        self.assertEqual(get_left_score(game, player), 100)
+        
+        self.add_round_for_player(game, 1, 50)
+        self.assertEqual(get_left_score(game, player), 50)
+        
+        self.add_round_for_player(game, 1, 20)
+        self.assertEqual(get_left_score(game, player), 30)
+        
+        self.add_round_for_player(game, 1, 30)
+        self.assertEqual(get_left_score(game, player), 0)
 
 
     def test_get_queue(self):
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=User.objects.create(username="test"),
-            max_players=4,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 4)
+        """Test that get_queue returns the correct player queue order."""
+        game = self.create_game(score=100, max_players=4)
+        self.create_players(game, 4)
+        
         que_round_map = {
             1: [2, 3, 4],
             2: [3, 4, 1],
@@ -63,19 +80,14 @@ class ConstantsTests(TestCase):
             4: [1, 2, 3],
             5: [2, 3, 4],
         }
+        
         for i in range(1, 5):
             self.assertEqual(get_queue(game, i), que_round_map[i])
-            MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=i), points=0)
+            self.add_round_for_player(game, i, 0)
     def test_get_game_context(self):
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=User.objects.create(username="test"),
-            max_players=4,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 4)
+        """Test get_game_context returns correct game state and player information."""
+        game = self.create_game(score=100, max_players=4)
+        self.create_players(game, 4)
         
         # Test initial context (turn 1, no rounds played yet)
         context = get_game_context(game)
@@ -98,7 +110,7 @@ class ConstantsTests(TestCase):
             self.assertEqual(queue_player["checkout_suggestion"], "T20 D20")
         
         # Add a round for player 1 and test turn 2
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=50)
+        self.add_round_for_player(game, 1, 50)
         
         context = get_game_context(game)
         self.assertEqual(context["turn"].rank, 2)  # Should be player 2's turn
@@ -115,9 +127,9 @@ class ConstantsTests(TestCase):
         self.assertEqual(player_1_in_queue["checkout_suggestion"], "S10 D20")  # checkout for 50
         
         # Test after all players have played one round
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=2), points=30)
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=3), points=40)
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=4), points=25)
+        self.add_round_for_player(game, 2, 30)
+        self.add_round_for_player(game, 3, 40)
+        self.add_round_for_player(game, 4, 25)
         
         # Should be back to player 1's turn
         context = get_game_context(game)
@@ -131,131 +143,122 @@ class ConstantsTests(TestCase):
         self.assertEqual(queue_scores[4], 75)  # 100 - 25
 
     def test_add_round_valid_round(self):
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=User.objects.create(username="test"),
-            max_players=1,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 1)
-        self.assertEqual(add_round(game, MultiplayerPlayer.objects.get(rank=1), 50), False)
+        """Test adding a valid round that doesn't end the game."""
+        game = self.create_game(score=100, max_players=1)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        
+        result = add_round(game, player, 50)
+        
+        self.assertEqual(result, False)
         self.assertEqual(game.status, MultiplayerGameStatus.PROGRESS.value)
         self.assertEqual(game.game_rounds.count(), 1)   
-        self.assertEqual(game.game_rounds.get(player=MultiplayerPlayer.objects.get(rank=1)).points, 50)
+        self.assertEqual(game.game_rounds.get(player=player).points, 50)
     def test_add_round_checkout(self):
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=User.objects.create(username="test"),
-            max_players=1,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 1) 
-        self.assertEqual(add_round(game, MultiplayerPlayer.objects.get(rank=1), 100), True)
+        """Test adding a round that wins the game (checkout)."""
+        game = self.create_game(score=100, max_players=1)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        
+        result = add_round(game, player, 100)
+        
+        self.assertEqual(result, True)
         self.assertEqual(game.status, MultiplayerGameStatus.FINISHED.value)
-        self.assertEqual(game.winner, MultiplayerPlayer.objects.get(rank=1))
-        self.assertEqual(game.game_rounds.get(player=MultiplayerPlayer.objects.get(rank=1)).points, 100)
+        self.assertEqual(game.winner, player)
+        self.assertEqual(game.game_rounds.get(player=player).points, 100)
 
     def test_add_rounds_invalid_checkout(self):
-        game = MultiplayerGame.objects.create(
-            score=170,
-            creator=User.objects.create(username="test"),
-            max_players=1,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 1)     
-        self.assertEqual(add_round(game, MultiplayerPlayer.objects.get(rank=1), 169), False)
+        """Test adding a round with invalid checkout (169 is not valid)."""
+        game = self.create_game(score=170, max_players=1)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        
+        result = add_round(game, player, 169)
+        
+        self.assertEqual(result, False)
         self.assertEqual(game.status, MultiplayerGameStatus.PROGRESS.value)
-        self.assertEqual(game.game_rounds.get(player=MultiplayerPlayer.objects.get(rank=1)).points, 0)
+        self.assertEqual(game.game_rounds.get(player=player).points, 0)
 
     def test_add_rounds_invalid_round(self):
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=User.objects.create(username="test"),
-            max_players=1,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 1)     
-        self.assertEqual(add_round(game, MultiplayerPlayer.objects.get(rank=1), 181), False)
+        """Test adding rounds with invalid points (too high, negative)."""
+        game = self.create_game(score=100, max_players=1)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        
+        # Test points too high (>180)
+        result1 = add_round(game, player, 181)
+        self.assertEqual(result1, False)
         self.assertEqual(game.game_rounds.last().points, 0)
 
-        self.assertEqual(add_round(game, MultiplayerPlayer.objects.get(rank=1), -1), False)
+        # Test negative points
+        result2 = add_round(game, player, -1)
+        self.assertEqual(result2, False)
         self.assertEqual(game.game_rounds.last().points, 0)
 
     def test_get_average_points(self):
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=User.objects.create(username="test"),
-            max_players=1,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 1)     
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=50)
-        self.assertEqual(get_average_points(game, MultiplayerPlayer.objects.get(rank=1)), 50)
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=30)
-        self.assertEqual(get_average_points(game, MultiplayerPlayer.objects.get(rank=1)), 40)
+        """Test get_average_points calculation for a player."""
+        game = self.create_game(score=100, max_players=1)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        
+        self.add_round_for_player(game, 1, 50)
+        self.assertEqual(get_average_points(game, player), 50)
+        
+        self.add_round_for_player(game, 1, 30)
+        self.assertEqual(get_average_points(game, player), 40)
 
     def test_get_needed_rounds(self):
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=User.objects.create(username="test"),
-            max_players=1,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 1)     
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=20)
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=80)
-        self.assertEqual(get_needed_rounds(game, MultiplayerPlayer.objects.get(rank=1)), 2)
+        """Test get_needed_rounds calculation for a player."""
+        game = self.create_game(score=100, max_players=1)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        
+        self.add_round_for_player(game, 1, 20)
+        self.add_round_for_player(game, 1, 80)
+        
+        self.assertEqual(get_needed_rounds(game, player), 2)
 
     def test_get_ending_context(self):
-        game = MultiplayerGame.objects.create(
-            score=140,
-            creator=User.objects.create(username="test"),
-            max_players=1,
-            online=True,
-            status=MultiplayerGameStatus.PROGRESS.value,
-            session=None,
-        )
-        create_players(game, 1)  
+        """Test get_ending_context returns correct game ending information."""
+        game = self.create_game(score=140, max_players=1)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        
         game.status = MultiplayerGameStatus.PROGRESS.value
-        game.winner = MultiplayerPlayer.objects.get(rank=1)
+        game.winner = player
         game.save()
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=90)
-        MultiplayerRound.objects.create(game=game, player=MultiplayerPlayer.objects.get(rank=1), points=50)
-        self.assertEqual(get_ending_context(game)["game"], game)
-        self.assertEqual(get_ending_context(game)["winner"], MultiplayerPlayer.objects.get(rank=1))
-        self.assertEqual(get_ending_context(game)["winner_stats"]["average_points"], 70)
-        self.assertEqual(get_ending_context(game)["winner_stats"]["needed_rounds"], 2)
+        
+        self.add_round_for_player(game, 1, 90)
+        self.add_round_for_player(game, 1, 50)
+        
+        context = get_ending_context(game)
+        
+        self.assertEqual(context["game"], game)
+        self.assertEqual(context["winner"], player)
+        self.assertEqual(context["winner_stats"]["average_points"], 70)
+        self.assertEqual(context["winner_stats"]["needed_rounds"], 2)
 
     def test_create_follow_up_game(self):
-        creator = User.objects.create(username="test_follow_up")
-        game = MultiplayerGame.objects.create(
-            score=100,
-            creator=creator,
-            max_players=2,
-            online=True,
-            status=MultiplayerGameStatus.FINISHED.value,
-            session=None,
-        )
-        create_players(game, 2)
+        """Test create_follow_up_game creates a new game with rotated player order."""
+        game = self.create_game(score=100, max_players=2, creator=self.user2, status=MultiplayerGameStatus.FINISHED.value)
+        self.create_players(game, 2)
+        
+        original_player_1 = self.get_player(game, 1)
+        original_player_2 = self.get_player(game, 2)
+        
         new_game = create_follow_up_game(game)
+        
         self.assertEqual(new_game.score, 100)
-        self.assertEqual(new_game.creator, creator)
+        self.assertEqual(new_game.creator, self.user2)
         self.assertEqual(new_game.max_players, 2)
         self.assertEqual(new_game.online, True)
         self.assertEqual(new_game.status, MultiplayerGameStatus.PROGRESS.value)
         self.assertEqual(new_game.session, None)
         self.assertEqual(new_game.game_players.count(), 2)
-        self.assertEqual(new_game.game_players.get(game=new_game, rank=1).player, MultiplayerPlayer.objects.get(game=game, rank=2).player)
-        self.assertEqual(new_game.game_players.get(game=new_game, rank=2).player, MultiplayerPlayer.objects.get(game=game, rank=1).player)
+        
+        # Players should be rotated: original rank 2 becomes rank 1, original rank 1 becomes rank 2
+        new_player_1 = self.get_player(new_game, 1)
+        new_player_2 = self.get_player(new_game, 2)
+        
+        self.assertEqual(new_player_1.player, original_player_2.player)
+        self.assertEqual(new_player_2.player, original_player_1.player)
