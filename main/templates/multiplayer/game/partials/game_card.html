@@ -1,6 +1,13 @@
+{% include "partials/modals/delete_multiplayer_round_modal.html" %}
+
 <div class="col-12 col-md-10 col-lg-8">
         <!-- Game Status and Player Queue -->
         <div class="card">
+            <div class="card-header bg-primary text-white text-left py-2">
+                    <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#deleteRoundModal" aria-label="Delete Last Round" title="Delete Last Round" style="min-height: 36px;">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
+            </div>
             <div class="card-body">
                 <!-- Current Player (Big Display) -->
                 <div class="text-center mb-4">
@@ -32,6 +39,7 @@
                         {% csrf_token %}
                         {% include "partials/point_input.html" %}
                     </form>
+                   
                 </div>
                 {% endif %}
             </div>

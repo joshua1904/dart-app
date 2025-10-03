@@ -2,14 +2,21 @@
 {% load static %}
 
 
+{% block header %}{% endblock %}
 {% block content %}
+
+<!-- Modal -->
+{% include "partials/modals/delete_singleplayer_round_modal.html" %}
 <!-- Game specific styles -->
 <link rel="stylesheet" href="{% static 'css/game.css' %}">
 
 <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
-        <div class="card fade-in">
-            <div class="card-header bg-primary text-white text-center">
+        <div class="card">
+            <div class="card-header bg-primary text-white text-left py-2">
+                    <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#deleteRoundModal" aria-label="Delete Last Round" title="Delete Last Round" style="min-height: 36px;">
+                        <i class="bi bi-arrow-counterclockwise"></i>
+                    </button>
             </div>
             <div class="card-body text-center">
                 <!-- Progress Stats -->
@@ -33,13 +40,15 @@
                         </div>
                     </div>
                    
+
+</div>
                 </div>
 
                 <!-- Checkout Suggestion -->
                 {% if checkout_suggestion %}
                 {% include "partials/checkout_suggestion.html" %}
                 {% endif %}
-        
+                
                 <!-- Game Form -->
                 <div class="bg-light rounded-3 p-4">
                     <form method="post" action="" class="needs-validation" novalidate>
@@ -52,43 +61,4 @@
     </div>
 </div>
 
-<script>
-// Form validation
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    }, false);
-})();
-
-// Quick score selection for mobile
-document.addEventListener('DOMContentLoaded', function() {
-    const quickScoreButtons = document.querySelectorAll('.quick-score');
-    const scoreInput = document.querySelector('input[name="this_score"]');
-    
-    quickScoreButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const score = this.getAttribute('data-score');
-            scoreInput.value = score;
-            scoreInput.focus();
-            
-            // Visual feedback
-            quickScoreButtons.forEach(btn => btn.classList.remove('btn-primary'));
-            quickScoreButtons.forEach(btn => btn.classList.add('btn-outline-primary'));
-            this.classList.remove('btn-outline-primary');
-            this.classList.add('btn-primary');
-        });
-    });
-
-});
-</script>
 {% endblock %}

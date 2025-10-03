@@ -1,0 +1,24 @@
+<div class="modal fade" id="deleteRoundModal" tabindex="-1" aria-labelledby="deleteRoundModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content border-0 shadow-lg" style="border-radius: 12px;">
+            <form method="post" action="{% url 'delete_round' game_id=game.id %}">
+                {% csrf_token %}
+                <div class="modal-header border-0 bg-danger text-white justify-content-center">
+                        <h1 class="modal-title fs-5 fw-semibold mb-0" id="deleteRoundModalLabel">Delete Last Round</h1>
+                    
+                </div>
+                <div class="modal-body text-center py-4">
+                    <div class="mb-3">
+                        <p class="mb-0">Are you sure you want to delete the last round?</p>
+                    </div>
+                </div>
+                <div class="modal-footer border-0 justify-content-center gap-2">
+                    <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal" style="min-width: 100px;">Cancel</button>
+                    <button type="submit" class="btn btn-danger" style="min-width: 100px;">
+                        Yes
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
