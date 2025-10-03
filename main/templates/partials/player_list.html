@@ -7,7 +7,10 @@
                     <div>
                         <h5 class="card-title mb-1 fw-bold">
                             {{ player_data.player.display_name }}
-                        </h6>
+                            {% if player_data.wins > 0 %}
+                            <span class="badge bg-primary ms-2">{{ player_data.wins }}</span>
+                            {% endif %}
+                        </h5>
             
                     </div>
                     <div class="text-end">

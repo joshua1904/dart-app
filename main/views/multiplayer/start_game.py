@@ -3,7 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
 from main.forms.multiplayer_game_form import MultiplayerGameForm
-from main.models import Session
+from main.models import Session, MultiplayerGame, MultiplayerPlayer
 
 
 class StartGame(views.View):
@@ -19,13 +19,15 @@ class StartGame(views.View):
             return render(
                 request, "multiplayer/start_game.html", context={"form": form}
             )
-        session = Session.objects.create()
-        game = form.save(commit=False)
-        game.creator = request.user
-        game.session = session
-        game.save()
+        session = Session.objects.create(first_to=form.cleaned_data["first_to"])
+        game = MultiplayerGame.objects.create(
+            score=form.cleaned_data["score"],
+            max_players=form.cleaned_data["max_players"],
+            online=form.cleaned_data["online"],
+            session=session,
+            creator=request.user,
+        )
         # Add the creator as the first player
-        from main.models import MultiplayerPlayer
 
         MultiplayerPlayer.objects.create(
             game=game,

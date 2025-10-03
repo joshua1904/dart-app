@@ -1,7 +1,6 @@
 from django.test import TestCase
-from main.business_logic.multiplayer_game import get_queue, get_turn, get_left_score, get_game_context, add_round, get_needed_rounds, get_ending_context, get_average_points, create_follow_up_game
-from main.models import MultiplayerGame, MultiplayerRound
-from main.models import MultiplayerPlayer
+from main.business_logic.multiplayer_game import get_queue, get_turn, get_left_score, get_game_context, add_round, get_needed_rounds, get_ending_context, get_average_points, create_follow_up_game, get_wins
+from main.models import MultiplayerGame, MultiplayerRound, MultiplayerPlayer, Session
 from main.utils import MultiplayerGameStatus
 from django.contrib.auth.models import User
 
@@ -13,7 +12,7 @@ class MultiplayerGameTests(TestCase):
         self.user1 = User.objects.create_user(username="testuser1", password="testpass")
         self.user2 = User.objects.create_user(username="testuser2", password="testpass")
         
-    def create_game(self, score=100, max_players=1, online=True, status=MultiplayerGameStatus.PROGRESS.value, creator=None):
+    def create_game(self, score=100, max_players=1, online=True, status=MultiplayerGameStatus.PROGRESS.value, creator=None, session=None):
         """Helper method to create a multiplayer game with default values."""
         if creator is None:
             creator = self.user1
@@ -23,7 +22,7 @@ class MultiplayerGameTests(TestCase):
             max_players=max_players,
             online=online,
             status=status,
-            session=None,
+            session=session or Session.objects.create(),
         )
     
     def create_players(self, game: MultiplayerGame, num_players: int):
@@ -253,7 +252,7 @@ class MultiplayerGameTests(TestCase):
         self.assertEqual(new_game.max_players, 2)
         self.assertEqual(new_game.online, True)
         self.assertEqual(new_game.status, MultiplayerGameStatus.PROGRESS.value)
-        self.assertEqual(new_game.session, None)
+        self.assertEqual(new_game.session, game.session)
         self.assertEqual(new_game.game_players.count(), 2)
         
         # Players should be rotated: original rank 2 becomes rank 1, original rank 1 becomes rank 2
@@ -262,3 +261,182 @@ class MultiplayerGameTests(TestCase):
         
         self.assertEqual(new_player_1.player, original_player_2.player)
         self.assertEqual(new_player_2.player, original_player_1.player)
+
+    def test_get_wins_with_null_session(self):
+        """Test get_wins returns 0 when session is None."""
+        game = self.create_game(score=100, max_players=1)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        
+        wins = get_wins(None, player)
+        self.assertEqual(wins, 0)
+
+    def test_get_wins_authenticated_user_no_wins(self):
+        """Test get_wins returns 0 for authenticated user with no wins."""
+        session = Session.objects.create()
+        game = self.create_game(score=100, max_players=1, session=session)
+        
+        # Create player with authenticated user
+        player = MultiplayerPlayer.objects.create(game=game, rank=1, player=self.user1)
+        
+        wins = get_wins(session, player)
+        self.assertEqual(wins, 0)
+
+    def test_get_wins_authenticated_user_with_wins(self):
+        """Test get_wins returns correct count for authenticated user with wins."""
+        session = Session.objects.create()
+        
+        # Create multiple games in the session
+        game1 = self.create_game(score=100, max_players=2, session=session)
+        game2 = self.create_game(score=100, max_players=2, session=session)
+        game3 = self.create_game(score=100, max_players=2, session=session)
+        
+        # Create players for each game
+        player1_game1 = MultiplayerPlayer.objects.create(game=game1, rank=1, player=self.user1)
+        player2_game1 = MultiplayerPlayer.objects.create(game=game1, rank=2, player=self.user2)
+        
+        player1_game2 = MultiplayerPlayer.objects.create(game=game2, rank=1, player=self.user1)
+        player2_game2 = MultiplayerPlayer.objects.create(game=game2, rank=2, player=self.user2)
+        
+        player1_game3 = MultiplayerPlayer.objects.create(game=game3, rank=1, player=self.user1)
+        player2_game3 = MultiplayerPlayer.objects.create(game=game3, rank=2, player=self.user2)
+        
+        # Set winners: user1 wins game1 and game3, user2 wins game2
+        game1.winner = player1_game1
+        game1.save()
+        
+        game2.winner = player2_game2
+        game2.save()
+        
+        game3.winner = player1_game3
+        game3.save()
+        
+        # Test wins for user1 (should have 2 wins)
+        wins_user1 = get_wins(session, player1_game1)
+        self.assertEqual(wins_user1, 2)
+        
+        # Test wins for user2 (should have 1 win)
+        wins_user2 = get_wins(session, player2_game1)
+        self.assertEqual(wins_user2, 1)
+
+    def test_get_wins_guest_player_no_wins(self):
+        """Test get_wins returns 0 for guest player with no wins."""
+        session = Session.objects.create()
+        game = self.create_game(score=100, max_players=1, session=session)
+        
+        # Create guest player
+        guest_player = MultiplayerPlayer.objects.create(game=game, rank=1, guest_name="GuestPlayer")
+        
+        wins = get_wins(session, guest_player)
+        self.assertEqual(wins, 0)
+
+    def test_get_wins_guest_player_with_wins(self):
+        """Test get_wins returns correct count for guest player with wins."""
+        session = Session.objects.create()
+        
+        # Create multiple games in the session
+        game1 = self.create_game(score=100, max_players=2, session=session)
+        game2 = self.create_game(score=100, max_players=2, session=session)
+        game3 = self.create_game(score=100, max_players=2, session=session)
+        
+        # Create guest players for each game
+        guest1_game1 = MultiplayerPlayer.objects.create(game=game1, rank=1, guest_name="Guest1")
+        guest2_game1 = MultiplayerPlayer.objects.create(game=game1, rank=2, guest_name="Guest2")
+        
+        guest1_game2 = MultiplayerPlayer.objects.create(game=game2, rank=1, guest_name="Guest1")
+        guest2_game2 = MultiplayerPlayer.objects.create(game=game2, rank=2, guest_name="Guest2")
+        
+        guest1_game3 = MultiplayerPlayer.objects.create(game=game3, rank=1, guest_name="Guest1")
+        guest2_game3 = MultiplayerPlayer.objects.create(game=game3, rank=2, guest_name="Guest2")
+        
+        # Set winners: Guest1 wins game1 and game2, Guest2 wins game3
+        game1.winner = guest1_game1
+        game1.save()
+        
+        game2.winner = guest1_game2
+        game2.save()
+        
+        game3.winner = guest2_game3
+        game3.save()
+        
+        # Test wins for Guest1 (should have 2 wins)
+        wins_guest1 = get_wins(session, guest1_game1)
+        self.assertEqual(wins_guest1, 2)
+        
+        # Test wins for Guest2 (should have 1 win)
+        wins_guest2 = get_wins(session, guest2_game1)
+        self.assertEqual(wins_guest2, 1)
+
+    def test_get_wins_mixed_players(self):
+        """Test get_wins works correctly with mix of authenticated and guest players."""
+        session = Session.objects.create()
+        
+        # Create games with mixed player types
+        game1 = self.create_game(score=100, max_players=2, session=session)
+        game2 = self.create_game(score=100, max_players=2, session=session)
+        
+        # Game 1: authenticated user vs guest
+        auth_player_game1 = MultiplayerPlayer.objects.create(game=game1, rank=1, player=self.user1)
+        guest_player_game1 = MultiplayerPlayer.objects.create(game=game1, rank=2, guest_name="TestGuest")
+        
+        # Game 2: same players
+        auth_player_game2 = MultiplayerPlayer.objects.create(game=game2, rank=1, player=self.user1)
+        guest_player_game2 = MultiplayerPlayer.objects.create(game=game2, rank=2, guest_name="TestGuest")
+        
+        # Set winners: authenticated user wins game1, guest wins game2
+        game1.winner = auth_player_game1
+        game1.save()
+        
+        game2.winner = guest_player_game2
+        game2.save()
+        
+        # Test wins
+        auth_wins = get_wins(session, auth_player_game1)
+        guest_wins = get_wins(session, guest_player_game1)
+        
+        self.assertEqual(auth_wins, 1)
+        self.assertEqual(guest_wins, 1)
+
+    def test_get_game_context_includes_wins(self):
+        """Test get_game_context includes wins information for all players."""
+        session = Session.objects.create()
+        
+        # Create a game with session
+        game = self.create_game(score=100, max_players=3, session=session)
+        
+        # Create players with different types
+        auth_player = MultiplayerPlayer.objects.create(game=game, rank=1, player=self.user1)
+        guest_player = MultiplayerPlayer.objects.create(game=game, rank=2, guest_name="TestGuest")
+        auth_player2 = MultiplayerPlayer.objects.create(game=game, rank=3, player=self.user2)
+        
+        # Create previous games in the session to establish win history
+        prev_game1 = self.create_game(score=100, max_players=2, session=session)
+        prev_auth_player1 = MultiplayerPlayer.objects.create(game=prev_game1, rank=1, player=self.user1)
+        prev_guest_player1 = MultiplayerPlayer.objects.create(game=prev_game1, rank=2, guest_name="TestGuest")
+        prev_game1.winner = prev_auth_player1  # user1 wins
+        prev_game1.save()
+        
+        prev_game2 = self.create_game(score=100, max_players=2, session=session)
+        prev_auth_player2 = MultiplayerPlayer.objects.create(game=prev_game2, rank=1, player=self.user1)
+        prev_guest_player2 = MultiplayerPlayer.objects.create(game=prev_game2, rank=2, guest_name="TestGuest")
+        prev_game2.winner = prev_guest_player2  # guest wins
+        prev_game2.save()
+        
+        prev_game3 = self.create_game(score=100, max_players=2, session=session)
+        prev_auth_player3 = MultiplayerPlayer.objects.create(game=prev_game3, rank=1, player=self.user2)
+        prev_guest_player3 = MultiplayerPlayer.objects.create(game=prev_game3, rank=2, guest_name="TestGuest")
+        prev_game3.winner = prev_guest_player3  # guest wins again
+        prev_game3.save()
+
+        context = get_game_context(game)
+
+        # Current turn is rank 1 (auth_player)
+        self.assertEqual(context["wins"], 1)
+
+        # Queue contains the other two players; verify their wins counts
+        guest_in_queue = next(p for p in context["queue"] if p["player"].guest_name == "TestGuest")
+        auth2_in_queue = next(p for p in context["queue"] if p["player"].player == self.user2)
+
+        self.assertEqual(guest_in_queue["wins"], 2)
+        self.assertEqual(auth2_in_queue["wins"], 0)
+      

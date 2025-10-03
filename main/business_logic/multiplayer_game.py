@@ -5,7 +5,7 @@ import logging
 from main.business_logic.utils import get_points_of_round, get_checkout_suggestion
 from main.models import MultiplayerGame, MultiplayerPlayer, MultiplayerRound, Session
 from main.utils import  MultiplayerGameStatus
-
+from collections import defaultdict
 logger = logging.getLogger(__name__)
 def get_game_info(game_id: int):
     game = get_object_or_404(MultiplayerGame, id=game_id)
@@ -37,6 +37,16 @@ def get_queue(game, turn: int) -> list:
     queue = list(game.game_players.order_by("rank").values_list("rank", flat=True))
     return queue[turn:] + queue[: turn - 1]
 
+def get_wins(session: Session | None, player: MultiplayerPlayer) -> int:
+    if not session:
+        # currently sessions can be null
+        return 0
+    # Filter by the actual User, not the MultiplayerPlayer instance
+    if player.player:  # Check if it's not a guest
+        return session.games.filter(winner__player=player.player).count()
+    else:  # For guest players, filter by guest_name
+        return session.games.filter(winner__guest_name=player.guest_name).count()
+
 
 def get_game_context(game) -> dict:
     current_user = get_object_or_404(MultiplayerPlayer, game=game, rank=get_turn(game))
@@ -50,6 +60,8 @@ def get_game_context(game) -> dict:
                 "checkout_suggestion": get_checkout_suggestion(
                     get_left_score(game, player)
                 ),
+                'wins': get_wins(game.session, player)
+                
             }
         )
     return {
@@ -59,6 +71,8 @@ def get_game_context(game) -> dict:
         "checkout_suggestion": get_checkout_suggestion(
             get_left_score(game, current_user)
         ),
+        "average_points": get_average_points(game, current_user),
+        "wins": get_wins(game.session, current_user),
         "queue": queue_list,
     }
 
@@ -85,7 +99,20 @@ def get_needed_rounds(game, player) -> int:
     return game.game_rounds.filter(player=player).count()
 
 
+def get_players_ordered_by_wins(session: Session) -> list:
+    winner_dict = defaultdict(int)
+    for game in session.games.all():
+        if game.winner.player:
+            winner_dict[game.winner.player.username] += 1
+        else:
+            winner_dict[game.winner.guest_name] += 1
+    for player in session.games.first().game_players.all():
+        winner_dict[player.player.username if player.player else player.guest_name] += 0
+    return sorted(winner_dict.items(), key=lambda x: x[1], reverse=True)
+    
+    
 def get_ending_context(game) -> dict:
+
     winner_stats = {
         "average_points": get_average_points(game, game.winner),
         "needed_rounds": get_needed_rounds(game, game.winner),
@@ -94,17 +121,26 @@ def get_ending_context(game) -> dict:
         "game": game,
         "winner": game.winner,
         "winner_stats": winner_stats,
+        "players": get_players_ordered_by_wins(game.session),
+        "session_won": game.session.first_to and get_wins(game.session, game.winner) == game.session.first_to,
     }
 
 
 def create_follow_up_game(game: MultiplayerGame) -> MultiplayerGame:
+    # create also new session if session was won
+    session = game.session
+    if game.winner and game.session and game.session.first_to:
+        wins = get_wins(game.session, game.winner)
+        if wins == game.session.first_to:
+            session = Session.objects.create(first_to=game.session.first_to)
+    
     new_game = MultiplayerGame(
         score=game.score,
         creator=game.creator,
         max_players=game.max_players,
         online=game.online,
         status=MultiplayerGameStatus.PROGRESS.value,
-        session=game.session,
+        session=session,
     )
     new_game.save()
     
