@@ -10,6 +10,7 @@ from .views import (
     Lobby,
     MultiplayerGameView,
     MultiplayerGameOverviewView,
+    DeleteRoundView,
 )
 
 home_urlpatterns = [
@@ -32,6 +33,11 @@ single_player_urlpatterns = [
         "singleplayer/statistics/",
         login_required(StatisticsView.as_view()),
         name="statistics",
+    ),
+    path(
+        "singleplayer/game/<uuid:game_id>/delete_round/",
+        login_required(DeleteRoundView.as_view()),
+        name="delete_round",
     ),
 ]
 

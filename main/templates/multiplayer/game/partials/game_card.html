@@ -32,6 +32,14 @@
                         {% csrf_token %}
                         {% include "partials/point_input.html" %}
                     </form>
+                    <form ws-send class="text-center" style="width: 100%; max-width: 320px;">
+                        {% csrf_token %}
+                        <input type="hidden" name="action" value="delete_last_round">
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i>
+                            Delete Last Round
+                        </button>
+                    </form>
                 </div>
                 {% endif %}
             </div>

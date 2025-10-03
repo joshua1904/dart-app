@@ -46,6 +46,13 @@
                         {% csrf_token %}
                         {% include "partials/point_input.html" %}
                     </form>
+                    <form method="post" action="{% url 'delete_round' game_id=game.id %}" class="needs-validation" novalidate>
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger">
+                            <i class="bi bi-trash me-2"></i>
+                            Delete Last Round
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -53,42 +60,6 @@
 </div>
 
 <script>
-// Form validation
-(function() {
-    'use strict';
-    window.addEventListener('load', function() {
-        var forms = document.getElementsByClassName('needs-validation');
-        var validation = Array.prototype.filter.call(forms, function(form) {
-            form.addEventListener('submit', function(event) {
-                if (form.checkValidity() === false) {
-                    event.preventDefault();
-                    event.stopPropagation();
-                }
-                form.classList.add('was-validated');
-            }, false);
-        });
-    }, false);
-})();
 
-// Quick score selection for mobile
-document.addEventListener('DOMContentLoaded', function() {
-    const quickScoreButtons = document.querySelectorAll('.quick-score');
-    const scoreInput = document.querySelector('input[name="this_score"]');
-    
-    quickScoreButtons.forEach(button => {
-        button.addEventListener('click', function() {
-            const score = this.getAttribute('data-score');
-            scoreInput.value = score;
-            scoreInput.focus();
-            
-            // Visual feedback
-            quickScoreButtons.forEach(btn => btn.classList.remove('btn-primary'));
-            quickScoreButtons.forEach(btn => btn.classList.add('btn-outline-primary'));
-            this.classList.remove('btn-outline-primary');
-            this.classList.add('btn-primary');
-        });
-    });
 
-});
-</script>
 {% endblock %}

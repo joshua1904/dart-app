@@ -1,6 +1,7 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
+from main.business_logic.utils import delete_last_round
 from main.models import MultiplayerGame, MultiplayerPlayer
 from django.template.loader import render_to_string
 from urllib.parse import parse_qs
@@ -54,9 +55,7 @@ class GameConsumer(WebsocketConsumer):
                 guest_name=player.guest_name,
             )
         logger.info(f"New game created: {new_game.id}")
-        event = {"type": "redirect_all", "url": f"/multiplayer/game/{new_game.id}/"}
-        # Send redirect to current game group (where clients are connected)
-        async_to_sync(self.channel_layer.group_send)(str(self.game_id), event)
+        self.create_redirect_all_event(f"/multiplayer/game/{new_game.id}/")
 
     def receive(self, text_data):
         data = {}
@@ -73,8 +72,13 @@ class GameConsumer(WebsocketConsumer):
                 data.update(parsed)
             except Exception:
                 pass
-        if data.get("action") == "new_game":
+        action = data.get("action")
+        if action == "new_game":
             self.new_game()
+            return
+        if action == "delete_last_round":
+            delete_last_round(self.game)
+            self.update_content_event()
             return
         points = data.get("points")
         if not points:
@@ -83,18 +87,13 @@ class GameConsumer(WebsocketConsumer):
         if player.player != self.scope["user"] and player.player != None:
             logger.warning(f"Player {player.player} is not the current player")
             return
+
         # add round returns true if game is ended
         if add_round(self.game, player, int(points)):
-            event = {
-                "type": "redirect_all",
-                "url": f"/multiplayer/game/{self.game_id}/overview/",
-            }
-            async_to_sync(self.channel_layer.group_send)(str(self.game_id), event)
+            self.create_redirect_all_event(f"/multiplayer/game/{self.game_id}/overview/")
             return
 
-        # Update game content
-        event = {"type": "send_game_content", "game_id": self.game_id}
-        async_to_sync(self.channel_layer.group_send)(str(self.game_id), event)
+        self.update_content_event()
 
     def send_game_content(self, event):
         game_id = event["game_id"]
@@ -113,3 +112,14 @@ class GameConsumer(WebsocketConsumer):
         # Send JSON message with redirect instruction
         redirect_message = {"type": "redirect", "url": url}
         self.send(text_data=json.dumps(redirect_message))
+
+    def create_redirect_all_event(self, url: str):
+        event = {
+                "type": "redirect_all",
+                "url": url,
+            }
+        async_to_sync(self.channel_layer.group_send)(str(self.game_id), event)
+
+    def update_content_event(self):
+        event = {"type": "send_game_content", "game_id": self.game_id}
+        async_to_sync(self.channel_layer.group_send)(str(self.game_id), event)
