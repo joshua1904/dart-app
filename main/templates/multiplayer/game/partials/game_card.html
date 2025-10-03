@@ -13,8 +13,16 @@
                 <div class="text-center mb-4">
                     <div class="row">
                         <div class="col-md-6">
-                            <h3 class="text-primary">{{ turn }}</h3>
+                            <h3 class="text-primary">
+                                {{ turn }}
+                                {% if wins > 0 %}
+                                <span class="badge bg-primary ms-2">{{ wins }}</span>
+                                {% endif %}
+                            </h3>
                             <h1 class="display-4 fw-bold text-primary">{{ left_score }}</h1>
+                            {% if average_points %}
+                            <small class="text-muted">Avg: {{ average_points|floatformat:1 }}</small>
+                            {% endif %}
                         </div>
                         <div class="col-md-6">
                             {% include "partials/player_list.html" %}

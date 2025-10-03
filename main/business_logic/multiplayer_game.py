@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from django.shortcuts import get_object_or_404
-from django.db.models import Sum, Avg
+from django.db.models import Q, OuterRef, Sum, Avg, Count
 import logging
 from main.business_logic.utils import get_points_of_round, get_checkout_suggestion
 from main.models import MultiplayerGame, MultiplayerPlayer, MultiplayerRound, Session
@@ -37,6 +37,16 @@ def get_queue(game, turn: int) -> list:
     queue = list(game.game_players.order_by("rank").values_list("rank", flat=True))
     return queue[turn:] + queue[: turn - 1]
 
+def get_wins(session: Session | None, player: MultiplayerPlayer) -> int:
+    if not session:
+        # currently sessions can be null
+        return 0
+    # Filter by the actual User, not the MultiplayerPlayer instance
+    if player.player:  # Check if it's not a guest
+        return session.games.filter(winner__player=player.player).count()
+    else:  # For guest players, filter by guest_name
+        return session.games.filter(winner__guest_name=player.guest_name).count()
+
 
 def get_game_context(game) -> dict:
     current_user = get_object_or_404(MultiplayerPlayer, game=game, rank=get_turn(game))
@@ -50,6 +60,8 @@ def get_game_context(game) -> dict:
                 "checkout_suggestion": get_checkout_suggestion(
                     get_left_score(game, player)
                 ),
+                'wins': get_wins(game.session, player)
+                
             }
         )
     return {
@@ -59,6 +71,8 @@ def get_game_context(game) -> dict:
         "checkout_suggestion": get_checkout_suggestion(
             get_left_score(game, current_user)
         ),
+        "average_points": get_average_points(game, current_user),
+        "wins": get_wins(game.session, current_user),
         "queue": queue_list,
     }
 
