@@ -5,16 +5,6 @@
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-12 col-md-10 col-lg-8">
-        <!-- Game Over Header -->
-        <div class="card mb-4 fade-in">
-            <div class="card-header bg-success text-white text-center">
-                <h2 class="mb-0">
-                    <i class="bi bi-trophy-fill me-2"></i>
-                    Game Complete!
-                </h2>
-            </div>
-        </div>
-
         <!-- Winner Announcement -->
         <div class="card mb-4 bounce-in">
             <div class="card-body text-center">
@@ -22,66 +12,53 @@
                     <i class="bi bi-trophy-fill text-warning" style="font-size: 4rem;"></i>
                 </div>
                 <h1 class="display-4 fw-bold text-success mb-3">
-                    🎉 {{ game.winner.display_name }} Wins! 🎉
+                    {% if session_won %}
+                    Game Shot - {{ game.winner.display_name }} 
+                    {% else %}
+                    Game Shot and the match - {{ game.winner.display_name }} 
+                    {% endif %}
                 </h1>
-                <p class="lead text-muted">
-                    Congratulations on finishing the game!
-                </p>
             </div>
         </div>
 
-        <!-- Session Won Banner -->
-        {% if session_won %}
-        <div class="card mb-4 session-won-banner">
-            <div class="card-body text-center py-4">
-                <div class="mb-3">
-                    <i class="bi bi-stars text-warning" style="font-size: 3rem;"></i>
-                </div>
-                <h2 class="fw-bold text-white mb-2">
-                    🏆 SESSION CHAMPION! 🏆
-                </h2>
-                <p class="text-white mb-0 fs-5">
-                    {{ game.winner.display_name }} has won the entire session!
-                </p>
-            </div>
-        </div>
-        {% endif %}
-
-        <!-- Winner Stats -->
-        <div class="row mb-4">
-            <div class="col-md-6 mb-3">
-                <div class="card stats-card-rounds h-100">
-                    <div class="card-body text-center">
-                        <div class="stats-icon mb-3">
-                            <i class="bi bi-arrow-repeat text-primary" style="font-size: 2.5rem;"></i>
-                        </div>
-                        <h3 class="fw-bold text-primary">{{ winner_stats.needed_rounds }}</h3>
-                        <p class="text-muted mb-0">Rounds to Victory</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        {% include 'multiplayer/game/partials/ranking_table.html' %}
         <!-- Game Summary -->
-        <div class="card mb-4">
-            <div class="card-header bg-primary text-white">
-                <h4 class="mb-0">
-                    <i class="bi bi-info-circle me-2"></i>
-                    Game Summary
-                </h4>
-            </div>
-            <div class="card-body">
-                <div class="row text-center">
-                    <div class="col-md-4 mb-3">
-                        <div class="border-end">
-                            <h5 class="text-primary">{{ game.score }}</h5>
-                            <p class="text-muted mb-0">Target Score</p>
-                        </div>
+        <div class="row justify-content-center mt-4 mb-4">
+            <div class="col-12 col-lg-10">
+                <div class="card shadow">
+                    <div class="card-header text-center" data-bs-toggle="collapse" data-bs-target="#game-summary" role="button" aria-expanded="false" aria-controls="game-summary">
+                        <h3 class="mb-0">
+                            
+                            Game Summary
+                            <i class="bi bi-chevron-down ms-2 chevron-icon"></i>
+                        </h3>
                     </div>
-                    <div class="col-md-4 mb-3">
-                        <div class="border-end">
-                            <h5 class="text-success">{{ game.max_players }}</h5>
-                            <p class="text-muted mb-0">Players</p>
+                    <div id="game-summary" class="collapse">
+
+                        <div class="card-body py-5">
+                            <div class="row text-center g-4">
+                                <div class="col-md-4">
+                                    <div class="p-4">
+                                        <i class="bi bi-bullseye display-4 text-primary mb-3"></i>
+                                        <h2 class="fw-bold text-primary">{{ game.score }}</h2>
+                                        <p class="text-muted fs-5 mb-0">Target Score</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-4">
+                                        <i class="bi bi-people-fill display-4 text-success mb-3"></i>
+                                        <h2 class="fw-bold text-success">{{ game.max_players }}</h2>
+                                        <p class="text-muted fs-5 mb-0">Players</p>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="p-4">
+                                        <i class="bi bi-arrow-repeat display-4 text-info mb-3"></i>
+                                        <h2 class="fw-bold text-info">{{ winner_stats.needed_rounds }}</h2>
+                                        <p class="text-muted fs-5 mb-0">Rounds to Victory</p>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -112,52 +89,7 @@
                     {% endif %}
                 </div>
             </div>
-            <!-- Session Leaderboard -->
-            {% if game.session %}
-            <div class="row justify-content-center mt-5">
-                <div class="col-md-8">
-                    <div class="card leaderboard-card">
-                        <div class="card-header bg-gradient text-white text-center">
-                            <h3 class="mb-0">
-                                <i class="bi bi-trophy me-2"></i>
-                                Session Leaderboard
-                            </h3>
-                        </div>
-                        <div class="card-body p-0">
-                            <div class="list-group list-group-flush">
-                                {% for player in players %}
-                                <div class="list-group-item player-item {% if forloop.first %}first-place{% elif forloop.counter == 2 %}second-place{% elif forloop.counter == 3 %}third-place{% endif %}">
-                                    <div class="d-flex align-items-center justify-content-between">
-                                        <div class="d-flex align-items-center">
-                                            <div class="rank-badge me-3">
-                                                {% if forloop.first %}
-                                                    <i class="bi bi-trophy-fill text-warning"></i>
-                                                {% elif forloop.counter == 2 %}
-                                                    <i class="bi bi-award-fill text-secondary"></i>
-                                                {% elif forloop.counter == 3 %}
-                                                    <i class="bi bi-award-fill" style="color: #cd7f32;"></i>
-                                                {% else %}
-                                                    <span class="rank-number">{{ forloop.counter }}</span>
-                                                {% endif %}
-                                            </div>
-                                            <div class="player-info">
-                                                <h5 class="mb-0 player-name">{{ player.0 }}</h5>
-                                            </div>
-                                        </div>
-                                        <div class="wins-badge">
-                                            <span class="badge bg-primary fs-6 px-3 py-2">
-                                                {{ player.1 }} {% if player.1 == 1 %}win{% else %}wins{% endif %}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            {% endif %}
+        
         </div>
     </div>
 </div>
@@ -202,6 +134,30 @@
 
 .border-end {
     border-right: 2px solid #e2e8f0 !important;
+}
+
+/* Game Summary Styling */
+.summary-clickable {
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 0.3s ease;
+}
+
+.summary-clickable:hover {
+    background-color: #0056b3 !important;
+}
+
+.summary-clickable::-webkit-details-marker {
+    display: none;
+}
+
+.chevron-icon {
+    transition: transform 0.3s ease;
+    display: inline-block;
+}
+
+.game-summary-details[open] .chevron-icon {
+    transform: rotate(180deg);
 }
 
 /* Session Won Banner Styling */
@@ -283,6 +239,13 @@
     border-radius: 20px;
     font-weight: 600;
     box-shadow: 0 2px 8px rgba(0, 123, 255, 0.3);
+    width: 56px; /* fixed width */
+    height: 36px; /* fixed height */
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    padding: 0 !important; /* override utility padding */
+    line-height: 1; /* prevent vertical overflow */
 }
 
 .first-place .rank-badge i {
@@ -318,7 +281,9 @@
     
     .wins-badge .badge {
         font-size: 0.875rem;
-        padding: 0.375rem 0.75rem !important;
+        width: 56px;
+        height: 36px;
+        padding: 0 !important;
     }
 }
 </style> 

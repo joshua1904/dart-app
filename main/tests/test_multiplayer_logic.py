@@ -22,7 +22,7 @@ class MultiplayerGameTests(TestCase):
             max_players=max_players,
             online=online,
             status=status,
-            session=session,
+            session=session or Session.objects.create(),
         )
     
     def create_players(self, game: MultiplayerGame, num_players: int):
@@ -252,7 +252,7 @@ class MultiplayerGameTests(TestCase):
         self.assertEqual(new_game.max_players, 2)
         self.assertEqual(new_game.online, True)
         self.assertEqual(new_game.status, MultiplayerGameStatus.PROGRESS.value)
-        self.assertEqual(new_game.session, None)
+        self.assertEqual(new_game.session, game.session)
         self.assertEqual(new_game.game_players.count(), 2)
         
         # Players should be rotated: original rank 2 becomes rank 1, original rank 1 becomes rank 2
@@ -427,4 +427,16 @@ class MultiplayerGameTests(TestCase):
         prev_guest_player3 = MultiplayerPlayer.objects.create(game=prev_game3, rank=2, guest_name="TestGuest")
         prev_game3.winner = prev_guest_player3  # guest wins again
         prev_game3.save()
+
+        context = get_game_context(game)
+
+        # Current turn is rank 1 (auth_player)
+        self.assertEqual(context["wins"], 1)
+
+        # Queue contains the other two players; verify their wins counts
+        guest_in_queue = next(p for p in context["queue"] if p["player"].guest_name == "TestGuest")
+        auth2_in_queue = next(p for p in context["queue"] if p["player"].player == self.user2)
+
+        self.assertEqual(guest_in_queue["wins"], 2)
+        self.assertEqual(auth2_in_queue["wins"], 0)
       

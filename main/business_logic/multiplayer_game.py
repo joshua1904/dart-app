@@ -107,9 +107,7 @@ def get_players_ordered_by_wins(session: Session) -> list:
         else:
             winner_dict[game.winner.guest_name] += 1
     for player in session.games.first().game_players.all():
-        print(player.player, player.guest_name, player)
         winner_dict[player.player.username if player.player else player.guest_name] += 0
-    print(winner_dict)
     return sorted(winner_dict.items(), key=lambda x: x[1], reverse=True)
     
     
