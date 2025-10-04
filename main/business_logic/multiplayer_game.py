@@ -61,7 +61,7 @@ def get_game_context(game) -> dict:
                     get_left_score(game, player)
                 ),
                 'wins': get_wins(game.session, player)
-                
+
             }
         )
     return {
@@ -109,8 +109,8 @@ def get_players_ordered_by_wins(session: Session) -> list:
     for player in session.games.first().game_players.all():
         winner_dict[player.player.username if player.player else player.guest_name] += 0
     return sorted(winner_dict.items(), key=lambda x: x[1], reverse=True)
-    
-    
+
+
 def get_ending_context(game) -> dict:
 
     winner_stats = {
@@ -133,7 +133,7 @@ def create_follow_up_game(game: MultiplayerGame) -> MultiplayerGame:
         wins = get_wins(game.session, game.winner)
         if wins == game.session.first_to:
             session = Session.objects.create(first_to=game.session.first_to)
-    
+
     new_game = MultiplayerGame(
         score=game.score,
         creator=game.creator,
@@ -143,7 +143,7 @@ def create_follow_up_game(game: MultiplayerGame) -> MultiplayerGame:
         session=session,
     )
     new_game.save()
-    
+
     for player in game.game_players.all():
         possible_new_rank = player.rank - 1
         new_rank = (
