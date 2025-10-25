@@ -6,13 +6,13 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('main', '0010_session_multiplayergame_session'),
+        ("main", "0010_session_multiplayergame_session"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='session',
-            name='first_to',
+            model_name="session",
+            name="first_to",
             field=models.IntegerField(null=True),
         ),
     ]

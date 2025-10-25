@@ -4,9 +4,12 @@ from django.db.models import Sum, Avg
 import logging
 from main.business_logic.utils import get_points_of_round, get_checkout_suggestion
 from main.models import MultiplayerGame, MultiplayerPlayer, MultiplayerRound, Session
-from main.utils import  MultiplayerGameStatus
+from main.utils import MultiplayerGameStatus
 from collections import defaultdict
+
 logger = logging.getLogger(__name__)
+
+
 def get_game_info(game_id: int):
     game = get_object_or_404(MultiplayerGame, id=game_id)
     return game
@@ -37,6 +40,7 @@ def get_queue(game, turn: int) -> list:
     queue = list(game.game_players.order_by("rank").values_list("rank", flat=True))
     return queue[turn:] + queue[: turn - 1]
 
+
 def get_wins(session: Session | None, player: MultiplayerPlayer) -> int:
     if not session:
         # currently sessions can be null
@@ -60,8 +64,7 @@ def get_game_context(game) -> dict:
                 "checkout_suggestion": get_checkout_suggestion(
                     get_left_score(game, player)
                 ),
-                'wins': get_wins(game.session, player)
-
+                "wins": get_wins(game.session, player),
             }
         )
     return {
@@ -122,7 +125,8 @@ def get_ending_context(game) -> dict:
         "winner": game.winner,
         "winner_stats": winner_stats,
         "players": get_players_ordered_by_wins(game.session),
-        "session_won": game.session.first_to and get_wins(game.session, game.winner) == game.session.first_to,
+        "session_won": game.session.first_to
+        and get_wins(game.session, game.winner) == game.session.first_to,
     }
 
 
@@ -146,9 +150,7 @@ def create_follow_up_game(game: MultiplayerGame) -> MultiplayerGame:
 
     for player in game.game_players.all():
         possible_new_rank = player.rank - 1
-        new_rank = (
-            possible_new_rank if possible_new_rank != 0 else game.max_players
-        )
+        new_rank = possible_new_rank if possible_new_rank != 0 else game.max_players
         MultiplayerPlayer.objects.create(
             game=new_game,
             player=player.player,

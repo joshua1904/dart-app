@@ -12,7 +12,7 @@ logger = logging.getLogger(__name__)
 
 class MultiplayerGameView(views.View):
     def get(self, request, game_id):
-        game = get_object_or_404(MultiplayerGame, id=game_id)   
+        game = get_object_or_404(MultiplayerGame, id=game_id)
         user = request.user
         # If game not started, send back to lobby
         if game.status == MultiplayerGameStatus.WAITING.value:

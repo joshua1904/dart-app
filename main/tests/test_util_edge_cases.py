@@ -14,4 +14,3 @@ class SingleplayerGameTests(TestCase):
         for i in range(1, 181):
             estimated_points = i if i in checkout_map else 0
             self.assertEqual(get_points_of_round(i, i), estimated_points)
-            

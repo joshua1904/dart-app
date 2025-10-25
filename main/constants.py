@@ -239,4 +239,4 @@ last_names = [
     # "Evans", "Veenstra", "Huybrechts", "White"
 ]
 
-IMPOSSIBLE_POINTS = {163,166,169,172,173,175,176,178,179}
+IMPOSSIBLE_POINTS = {163, 166, 169, 172, 173, 175, 176, 178, 179}

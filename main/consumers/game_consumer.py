@@ -5,7 +5,12 @@ from main.business_logic.utils import delete_last_round
 from main.models import MultiplayerGame, MultiplayerPlayer
 from django.template.loader import render_to_string
 from urllib.parse import parse_qs
-from main.business_logic.multiplayer_game import get_game_context, get_turn, add_round, create_follow_up_game
+from main.business_logic.multiplayer_game import (
+    get_game_context,
+    get_turn,
+    add_round,
+    create_follow_up_game,
+)
 import logging
 
 logger = logging.getLogger(__name__)
@@ -69,7 +74,9 @@ class GameConsumer(WebsocketConsumer):
 
         # add round returns true if game is ended
         if add_round(self.game, player, int(points)):
-            self.create_redirect_all_event(f"/multiplayer/game/{self.game_id}/overview/")
+            self.create_redirect_all_event(
+                f"/multiplayer/game/{self.game_id}/overview/"
+            )
             return
 
         self.update_content_event()
@@ -94,9 +101,9 @@ class GameConsumer(WebsocketConsumer):
 
     def create_redirect_all_event(self, url: str):
         event = {
-                "type": "redirect_all",
-                "url": url,
-            }
+            "type": "redirect_all",
+            "url": url,
+        }
         async_to_sync(self.channel_layer.group_send)(str(self.game_id), event)
 
     def update_content_event(self):
