@@ -1,6 +1,10 @@
 import json
+from venv import create
+
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
+
+from main.business_logic.lobby import create_missing_players
 from main.models import MultiplayerGame, MultiplayerPlayer
 from django.template.loader import render_to_string
 from urllib.parse import parse_qs
@@ -61,16 +65,7 @@ class LobbyConsumer(WebsocketConsumer):
                 # Mark game as started
                 self.game.status = MultiplayerGameStatus.PROGRESS.value
                 self.game.save(update_fields=["status"])
-                missing_players = self.game.max_players - self.game.game_players.count()
-                guest_names = get_guest_names(missing_players)
-                current_player_count = self.game.game_players.count()
-                for counter in range(missing_players):
-                    MultiplayerPlayer.objects.create(
-                        game=self.game,
-                        player=None,
-                        rank=current_player_count + counter + 1,
-                        guest_name=guest_names[counter],
-                    )
+                create_missing_players(self.game)
                 # Broadcast redirect to all clients in group
                 async_to_sync(self.channel_layer.group_send)(
                     str(self.game_id),

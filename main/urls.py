@@ -15,6 +15,11 @@ from .views import (
 
 home_urlpatterns = [
     path("", login_required(HomeView.as_view()), name="home"),
+    path(
+        "statistics/",
+        login_required(StatisticsView.as_view()),
+        name="statistics",
+    ),
 ]
 
 single_player_urlpatterns = [
@@ -28,11 +33,6 @@ single_player_urlpatterns = [
         "singleplayer/results/<uuid:game_id>/",
         login_required(ResultView.as_view()),
         name="result",
-    ),
-    path(
-        "statistics/",
-        login_required(StatisticsView.as_view()),
-        name="statistics",
     ),
     path(
         "singleplayer/game/<uuid:game_id>/delete_round/",

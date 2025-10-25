@@ -4,16 +4,6 @@ from main.models import MultiplayerGame
 
 
 class MultiplayerGameForm(forms.Form):
-    max_players = forms.IntegerField(
-        label="Players",
-        min_value=1,
-        widget=forms.NumberInput(
-            attrs={
-                "class": "form-control",
-                "placeholder": "Enter max players",
-            }
-        ),
-    )
     online = forms.BooleanField(
         label="Online",
         required=False,
@@ -24,6 +14,17 @@ class MultiplayerGameForm(forms.Form):
             }
         ),
     )
+    max_players = forms.IntegerField(
+        label="Players",
+        min_value=1,
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "placeholder": "Enter max players",
+            }
+        ),
+    )
+
     score = forms.IntegerField(
         label="Score",
         min_value=1,
