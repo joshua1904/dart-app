@@ -9,11 +9,11 @@
                     <i class="bi bi-graph-up me-2"></i>
                     Overall Statistics
                 </h3>
-                <form method="get" hx-get="{% url 'statistics' %}" hx-target="#statistics-table" hx-trigger="change">
+                <form method="get" hx-get="{% url 'statistics' %}" hx-target="#card-content" hx-trigger="change">
                     {{ filter.form }}
                 </form>
             </div>
-            <div class="card-body">
+            <div class="card-body" id="card-content">
                {% include 'statistics/partials/statistics.detail.html' %}
             </div>
         </div>

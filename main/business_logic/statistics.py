@@ -51,7 +51,9 @@ def get_multiplayer_statistics(games: QuerySet[MultiplayerGame], user) -> Statis
         ~Q(winner__player=user), status=MultiplayerGameStatus.FINISHED.value
     ).count()
     total_games = games.filter(status=MultiplayerGameStatus.FINISHED.value).count()
-    total_rounds = MultiplayerRound.objects.filter(game__in=games).count()
+    total_rounds = MultiplayerRound.objects.filter(
+        game__in=games, player__player=user
+    ).count()
     total_points = sum(
         MultiplayerRound.objects.filter(
             game__in=games, player__player=user

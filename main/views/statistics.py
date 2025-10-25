@@ -5,7 +5,7 @@ from main.business_logic.statistics import (
     get_singleplayer_statistics,
     get_multiplayer_statistics,
 )
-from main.models import Game, MultiplayerGame
+from main.models import Game, MultiplayerGame, MultiplayerRound
 from main.filter.game_filter import GameFilter, MultiplayerGameFilter
 
 
@@ -14,24 +14,32 @@ class StatisticsView(views.View):
         user = request.user
         games = Game.objects.filter(player=user)
         multiplayer_games = MultiplayerGame.objects.filter(game_players__player=user)
-        filter = GameFilter(request.GET, queryset=games)
+        round_choices = set(games.values_list("rounds", flat=True))
+        score_choices = set(games.values_list("score", flat=True))
+        print(round_choices)
+        single_player_filter = GameFilter(
+            request.GET,
+            queryset=games,
+            round_choices=round_choices,
+            score_choices=score_choices,
+        )
         multiplayer_filter = MultiplayerGameFilter(
             request.GET, queryset=multiplayer_games
         )
-        games = filter.qs
+        games = single_player_filter.qs
         multiplayer_games = multiplayer_filter.qs
         if request.META.get("HTTP_HX_REQUEST"):
             return render(
                 request,
-                "statics/partials/statistics.detail.html",
+                "statistics/partials/statistics.detail.html",
                 context={
-                    "singleplayer_games": games,
-                    "multiplayer_games": multiplayer_games,
+                    "singleplayer_games": games[:10],
+                    "multiplayer_games": multiplayer_games[:10],
                     "singleplayer_statistics": get_singleplayer_statistics(games),
                     "multiplayer_statistics": get_multiplayer_statistics(
                         multiplayer_games, user
                     ),
-                    "filter": filter,
+                    "filter": single_player_filter,
                 },
             )
 
@@ -39,12 +47,12 @@ class StatisticsView(views.View):
             request,
             "statistics/statistics.html",
             context={
-                "singleplayer_games": games,
-                "multiplayer_games": multiplayer_games,
+                "singleplayer_games": games[:10],
+                "multiplayer_games": multiplayer_games[:10],
                 "singleplayer_statistics": get_singleplayer_statistics(games),
                 "multiplayer_statistics": get_multiplayer_statistics(
                     multiplayer_games, user
                 ),
-                "filter": filter,
+                "filter": single_player_filter,
             },
         )
