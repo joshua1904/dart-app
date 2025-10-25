@@ -5,3 +5,5 @@
 main/__pycache__/
 */__pycache__/
 *.pyc
+/staticfiles/
+

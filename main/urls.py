@@ -30,7 +30,7 @@ single_player_urlpatterns = [
         name="result",
     ),
     path(
-        "singleplayer/statistics/",
+        "statistics/",
         login_required(StatisticsView.as_view()),
         name="statistics",
     ),

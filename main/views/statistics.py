@@ -1,35 +1,41 @@
 from django import views
 from django.shortcuts import render
-from main.models import Game
-from main.filter.game_filter import GameFilter
+
+from main.business_logic.statistics import get_singleplayer_statistics, get_multiplayer_statistics
+from main.models import Game, MultiplayerGame
+from main.filter.game_filter import GameFilter, MultiplayerGameFilter
 
 
 class StatisticsView(views.View):
     def get(self, request):
-        scores = Game.objects.values_list("score", flat=True).distinct()
-        rounds = Game.objects.values_list("rounds", flat=True).distinct()
-        games = Game.objects.all()
+        user = request.user
+        games = Game.objects.filter(player=user)
+        multiplayer_games = MultiplayerGame.objects.filter(game_players__player=user)
         filter = GameFilter(request.GET, queryset=games)
+        multiplayer_filter = MultiplayerGameFilter(request.GET, queryset=multiplayer_games)
         games = filter.qs
+        multiplayer_games = multiplayer_filter.qs
         if request.META.get("HTTP_HX_REQUEST"):
             return render(
                 request,
-                "statistics.detail.html",
+                "statics/partials/statistics.detail.html",
                 context={
-                    "games": games,
-                    "filter": filter,
-                    "scores": scores,
-                    "rounds": rounds,
-                },
+                'singleplayer_games': games,
+                'multiplayer_games': multiplayer_games,
+                "singleplayer_statistics": get_singleplayer_statistics(games),
+                "multiplayer_statistics": get_multiplayer_statistics(multiplayer_games, user),
+                "filter": filter,
+            },
             )
 
         return render(
             request,
-            "statistics.html",
+            "statistics/statistics.html",
             context={
-                "games": games,
+                'singleplayer_games': games,
+                'multiplayer_games': multiplayer_games,
+                "singleplayer_statistics": get_singleplayer_statistics(games),
+                "multiplayer_statistics": get_multiplayer_statistics(multiplayer_games, user),
                 "filter": filter,
-                "scores": scores,
-                "rounds": rounds,
             },
         )

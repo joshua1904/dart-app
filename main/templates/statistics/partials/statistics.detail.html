@@ -1,0 +1,4 @@
+             {% include "statistics/partials/game_statistic_cards.html"  with statistics=singleplayer_statistics name='Single player' %}
+             {% include "statistics/partials/game_statistic_cards.html"  with statistics=multiplayer_statistics name='Multiplayer'%}
+             {% include "statistics/partials/collapsebal_table.html" with games=singleplayer_games name='Singleplayer' %}
+             {% include "statistics/partials/collapsebal_table.html" with games=multiplayer_games name='Multiplayer' %}
