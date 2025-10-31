@@ -10,6 +10,7 @@ from main.utils import MULTIPLAYER_GAME_STATUS_CHOICES, MultiplayerGameStatus
 class Lobby(views.View):
     def get(self, request, game_id):
         game = get_object_or_404(MultiplayerGame, id=game_id)
+        message = request.GET.get("message")
         players = game.game_players.all()
         current_user = request.user
         current_user_in_game = players.filter(player=current_user).exists()
@@ -34,5 +35,7 @@ class Lobby(views.View):
                 "game": game,
                 "players": players,
                 "current_user_in_game": current_user_in_game,
+                "range": range(1, game.max_players + 1),
+                "message": message
             },
         )

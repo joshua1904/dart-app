@@ -3,13 +3,19 @@
         <i class="bi bi-person-lines-fill me-2"></i>
         Players ({{ players|length }}/{{ game.max_players }})
     </h5>
-    
+    <form ws-send>
     <div class="players-list">
         {% for player in players %}
             <div class="player-card {% if player.player == user %}current-user{% endif %}">
-                <div class="player-rank">
-                    <span class="rank-number">{{ player.rank }}</span>
+                {% if user == game.creator %}
+                <div class="me-3 me-md-2 mb-2 mb-md-0">
+                    <select id="{{ player.id }}-rank" name="{{ player.id }}-rank" class="form-select">
+                        {% for i in range %}
+                            <option value="{{ i }}" {% if player.rank == i %}selected{% endif %}>{{ i }}</option>
+                        {% endfor %}
+                    </select>
                 </div>
+                {% endif %}
                 <div class="player-info">
                     <div class="player-avatar">
                         <i class="bi bi-person-circle"></i>
@@ -41,15 +47,16 @@
         {% endfor %}
         {% if game.creator == user %}
         <div class="mt-3">
-            <form ws-send>
+
                 {% csrf_token %}
                 <input type="hidden" name="action" value="start_game">
                 <button type="submit" class="btn btn-success">
                     <i class="bi bi-play-fill me-1"></i>
                     Start Game
                 </button>
-            </form>
+
         </div>
         {% endif %}
     </div>
+    </form>
 </div>

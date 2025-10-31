@@ -3,12 +3,15 @@ from venv import create
 
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
+from django.db import transaction
+from django.urls import reverse_lazy, reverse
 
-from main.business_logic.lobby import create_missing_players
+from main.business_logic.lobby import create_missing_players, set_player_ranks, create_game
 from main.models import MultiplayerGame, MultiplayerPlayer
 from django.template.loader import render_to_string
 from urllib.parse import parse_qs
 from main.utils import MultiplayerGameStatus, get_guest_names
+from django.contrib import messages
 
 
 class LobbyConsumer(WebsocketConsumer):
@@ -60,20 +63,35 @@ class LobbyConsumer(WebsocketConsumer):
         # Handle actions
         action = data.get("action")
         if action == "start_game":
-            # Only host can start
+                # Only host can start
             if self.user == self.game.creator:
-                # Mark game as started
-                self.game.status = MultiplayerGameStatus.PROGRESS.value
-                self.game.save(update_fields=["status"])
-                create_missing_players(self.game)
-                # Broadcast redirect to all clients in group
-                async_to_sync(self.channel_layer.group_send)(
-                    str(self.game_id),
-                    {
-                        "type": "redirect_all",
-                        "url": f"/multiplayer/game/{self.game_id}/",
-                    },
-                )
+                try:
+                    create_game(self.game, data)
+                    async_to_sync(self.channel_layer.group_send)(
+                        str(self.game_id),
+                        {
+                            "type": "redirect_all",
+                            "url": f"/multiplayer/game/{self.game_id}/",
+                        },
+                    )
+                except Exception:
+                    message = f"{self.game.creator} has to give the players different ranks!"
+                    async_to_sync(self.channel_layer.group_send)(
+                        str(self.game_id),
+                        {
+                            "type": "redirect_all",
+                            "url": f'{reverse("lobby", kwargs={"game_id": self.game_id})}?message={message}',
+                        },
+                    )
+                    return
+            # Broadcast redirect to all clients in group
+            async_to_sync(self.channel_layer.group_send)(
+                str(self.game_id),
+                {
+                    "type": "redirect_all",
+                    "url": f"/multiplayer/game/{self.game_id}/",
+                },
+            )
             return
 
         # Default: update lobby content
@@ -90,6 +108,7 @@ class LobbyConsumer(WebsocketConsumer):
                 "game": game,
                 "players": game.game_players.all(),
                 "user": self.user,
+                "range":  range(1, game.max_players + 1)
             },
         )
         self.send(

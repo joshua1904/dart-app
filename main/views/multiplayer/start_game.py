@@ -30,7 +30,7 @@ class StartGame(views.View):
             online=online,
             session=session,
             creator=request.user,
-            status=MultiplayerGameStatus.WAITING.value if online else MultiplayerGameStatus.PROGRESS.value
+            status=MultiplayerGameStatus.WAITING.value
 
         )
         # Add the creator as the first player
@@ -41,7 +41,4 @@ class StartGame(views.View):
             rank=1,
         )
 
-        if game.online:
-            return redirect(reverse_lazy("lobby", kwargs={"game_id": game.id}))
-        create_missing_players(game)
-        return redirect(reverse_lazy("multiplayer_game", kwargs={"game_id": game.id}))
+        return redirect(reverse_lazy("lobby", kwargs={"game_id": game.id}))
