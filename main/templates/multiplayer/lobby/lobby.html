@@ -3,7 +3,7 @@
 
 {% block title %}Lobby - Multiplayer Dart Game{% endblock %}
 
-{% block header %}🎮 Game Lobby{% endblock %}
+{% block header %}<i class="bi bi-joystick me-2"></i>Game Lobby{% endblock %}
 
 {% block content %}
 <!-- Lobby specific styles -->
@@ -54,7 +54,7 @@
                     <div class="col-md-6">
                         <div class="info-card">
                             <div class="info-icon">
-                                <i class="bi bi-globe text-success"></i>
+                                <i class="bi bi-globe text-primary"></i>
                             </div>
                             <div class="info-content">
                                 <h6 class="info-label">Game Type</h6>
@@ -159,11 +159,11 @@
         const originalText = button.innerHTML;
         button.innerHTML = '<i class="bi bi-check me-1"></i>Copied!';
         button.classList.remove('btn-outline-light');
-        button.classList.add('btn-success');
+        button.classList.add('btn-primary');
         
         setTimeout(() => {
             button.innerHTML = originalText;
-            button.classList.remove('btn-success');
+            button.classList.remove('btn-primary');
             button.classList.add('btn-outline-light');
         }, 2000);
     }
