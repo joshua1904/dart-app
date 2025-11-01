@@ -2,7 +2,7 @@ import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
 from main.business_logic.utils import delete_last_round
-from main.models import MultiplayerGame, MultiplayerPlayer
+from main.models import MultiplayerGame
 from django.template.loader import render_to_string
 from urllib.parse import parse_qs
 from main.business_logic.multiplayer_game import (
@@ -68,7 +68,11 @@ class GameConsumer(WebsocketConsumer):
         if not points:
             points = 0
         player = self.game.game_players.get(rank=get_turn(self.game))
-        if player.player != self.scope["user"] and player.player != None and not self.game.one_device_manage:
+        if (
+            player.player != self.scope["user"]
+            and player.player != None
+            and not self.game.one_device_manage
+        ):
             logger.warning(f"Player {player.player} is not the current player")
             return
 

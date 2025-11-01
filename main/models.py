@@ -2,7 +2,11 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import ForeignKey
 from django.utils import timezone
-from main.utils import GAME_STATUS_CHOICES, MULTIPLAYER_GAME_STATUS_CHOICES, MultiplayerGameStatus
+from main.utils import (
+    GAME_STATUS_CHOICES,
+    MULTIPLAYER_GAME_STATUS_CHOICES,
+    MultiplayerGameStatus,
+)
 import uuid
 
 
@@ -66,7 +70,7 @@ class MultiplayerGame(models.Model):
     @property
     def is_progress(self):
         return self.status == MultiplayerGameStatus.PROGRESS.value
-    
+
     @property
     def is_finished(self):
         return self.status == MultiplayerGameStatus.FINISHED.value

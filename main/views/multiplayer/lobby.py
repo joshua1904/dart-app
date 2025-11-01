@@ -36,6 +36,6 @@ class Lobby(views.View):
                 "players": players,
                 "current_user_in_game": current_user_in_game,
                 "range": range(1, game.max_players + 1),
-                "message": message
+                "message": message,
             },
         )

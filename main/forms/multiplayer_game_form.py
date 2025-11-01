@@ -1,7 +1,5 @@
 from django import forms
 
-from main.models import MultiplayerGame
-
 
 class MultiplayerGameForm(forms.Form):
     online = forms.BooleanField(

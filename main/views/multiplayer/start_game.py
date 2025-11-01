@@ -11,8 +11,14 @@ class StartGame(views.View):
         form = MultiplayerGameForm(
             initial={"max_players": 2, "online": False, "score": 301}
         )
-        progress_games = MultiplayerGame.objects.filter(game_players__player=request.user).exclude(status=MultiplayerGameStatus.FINISHED.value)[:5]
-        return render(request, "multiplayer/start_game.html", context={"form": form, "progress_games": progress_games})
+        progress_games = MultiplayerGame.objects.filter(
+            game_players__player=request.user
+        ).exclude(status=MultiplayerGameStatus.FINISHED.value)[:5]
+        return render(
+            request,
+            "multiplayer/start_game.html",
+            context={"form": form, "progress_games": progress_games},
+        )
 
     def post(self, request):
         form = MultiplayerGameForm(request.POST)
@@ -29,8 +35,12 @@ class StartGame(views.View):
             online=online,
             session=session,
             creator=request.user,
-            status=MultiplayerGameStatus.WAITING.value if max_players > 1 else MultiplayerGameStatus.PROGRESS.value,
-            one_device_manage=form.cleaned_data["one_device_manage"]
+            status=(
+                MultiplayerGameStatus.WAITING.value
+                if max_players > 1
+                else MultiplayerGameStatus.PROGRESS.value
+            ),
+            one_device_manage=form.cleaned_data["one_device_manage"],
         )
         # Add the creator as the first player
 
@@ -40,6 +50,8 @@ class StartGame(views.View):
             rank=1,
         )
         if max_players == 1:
-            return redirect(reverse_lazy("multiplayer_game", kwargs={"game_id": game.id}))
+            return redirect(
+                reverse_lazy("multiplayer_game", kwargs={"game_id": game.id})
+            )
 
         return redirect(reverse_lazy("lobby", kwargs={"game_id": game.id}))
