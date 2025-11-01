@@ -68,7 +68,26 @@
                             </div>
                         </div>
                     </div>
+                    <div class="col-md-6">
+                        <div class="info-card">
+                            <div class="info-icon">
+                                <i class="bi bi-phone text-primary"></i>
+                            </div>
+                            <div class="info-content">
+                                <h6 class="info-label">Manage From One Device</h6>
+                                <span class="info-value">
+                                    {% if game.one_device_manage %}
+                                        <i class="bi bi-check-circle text-success me-1"></i>Enabled
+                                    {% else %}
+                                        <i class="bi bi-x-circle text-danger me-1"></i>Disabled
+                                    {% endif %}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+                <!-- One Device Manage Info -->
+
                 <!-- Persistent WebSocket connection (not swapped) -->
                 <div id="ws-connection" hx-ext="ws" ws-connect="/ws/lobby/{{ game.id }}/">
                           <!-- Swappable lobby content -->

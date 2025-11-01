@@ -41,7 +41,7 @@
 
                
 
-                {% if turn.player == user or turn.player is None %}
+                {% if turn.player == user or turn.player is None or game.one_device_manage %}
                 <div class="mt-3 d-flex justify-content-center">
                     <form ws-send class="text-center" style="width: 100%; max-width: 320px;">
                         {% csrf_token %}

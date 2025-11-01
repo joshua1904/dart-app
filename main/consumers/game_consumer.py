@@ -68,7 +68,7 @@ class GameConsumer(WebsocketConsumer):
         if not points:
             points = 0
         player = self.game.game_players.get(rank=get_turn(self.game))
-        if player.player != self.scope["user"] and player.player != None:
+        if player.player != self.scope["user"] and player.player != None and not self.game.one_device_manage:
             logger.warning(f"Player {player.player} is not the current player")
             return
 

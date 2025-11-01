@@ -29,8 +29,8 @@ class StartGame(views.View):
             online=online,
             session=session,
             creator=request.user,
-            status=MultiplayerGameStatus.WAITING.value if max_players > 1 else MultiplayerGameStatus.PROGRESS.value
-
+            status=MultiplayerGameStatus.WAITING.value if max_players > 1 else MultiplayerGameStatus.PROGRESS.value,
+            one_device_manage=form.cleaned_data["one_device_manage"]
         )
         # Add the creator as the first player
 

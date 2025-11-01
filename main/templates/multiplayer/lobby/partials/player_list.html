@@ -46,7 +46,7 @@
             </div>
         {% endfor %}
         {% if game.creator == user %}
-        <div class="mt-3">
+        <div class="mt-3 d-flex justify-content-center">
 
                 {% csrf_token %}
                 <input type="hidden" name="action" value="start_game">

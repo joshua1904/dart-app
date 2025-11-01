@@ -57,6 +57,7 @@ class MultiplayerGame(models.Model):
     session = models.ForeignKey(
         "Session", on_delete=models.CASCADE, related_name="games", null=True
     )
+    one_device_manage = models.BooleanField(default=False)
 
     @property
     def is_waiting(self):

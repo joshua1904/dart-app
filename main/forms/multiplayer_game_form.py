@@ -14,6 +14,16 @@ class MultiplayerGameForm(forms.Form):
             }
         ),
     )
+    one_device_manage = forms.BooleanField(
+        label="One device Manage",
+        required=False,
+        widget=forms.CheckboxInput(
+            attrs={
+                "class": "form-check-input",
+                "default": False,
+            }
+        ),
+    )
     max_players = forms.IntegerField(
         label="Players",
         min_value=1,

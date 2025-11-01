@@ -204,3 +204,22 @@ main {
 /* Harmonize Bootstrap utility classes with theme */
 .text-primary { color: var(--primary-color) !important; }
 .bg-primary { background-color: var(--primary-color) !important; }
+
+/* Pretty checkbox styling */
+.pretty-checkbox {
+    width: 1.15rem;
+    height: 1.15rem;
+    border-radius: 0.25rem;
+    accent-color: var(--primary-color);
+    cursor: pointer;
+    transition: transform 0.08s ease, box-shadow 0.2s ease;
+}
+
+.pretty-checkbox:hover {
+    transform: scale(1.05);
+}
+
+.pretty-checkbox:focus {
+    box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
+    outline: none;
+}

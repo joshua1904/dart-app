@@ -19,7 +19,33 @@
                     
                     <!-- Form Fields -->
                     <div class="mb-4">
-                        {{ form }}
+                        <!-- Checkboxes inline -->
+                        <div class="mb-3 d-flex align-items-center gap-4 flex-wrap">
+                            <div class="form-check form-check-inline">
+                                {{ form.online }}
+                                <label class="form-check-label" for="{{ form.online.id_for_label }}">{{ form.online.label }}</label>
+                            </div>
+                            <div class="form-check form-check-inline">
+                                {{ form.one_device_manage }}
+                                <label class="form-check-label" for="{{ form.one_device_manage.id_for_label }}">{{ form.one_device_manage.label }}</label>
+                            </div>
+                        </div>
+
+                        <!-- Number inputs in grid -->
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label" for="{{ form.max_players.id_for_label }}">{{ form.max_players.label }}</label>
+                                {{ form.max_players }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="{{ form.score.id_for_label }}">{{ form.score.label }}</label>
+                                {{ form.score }}
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label" for="{{ form.first_to.id_for_label }}">{{ form.first_to.label }}</label>
+                                {{ form.first_to }}
+                            </div>
+                        </div>
                     </div>
 
                     <!-- Start Button -->
