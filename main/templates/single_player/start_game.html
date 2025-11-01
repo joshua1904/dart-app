@@ -39,17 +39,44 @@
                     </div>
                 </form>
 
-                <!-- Game Rules -->
-                <div class="mt-4 p-3 bg-info bg-opacity-10 rounded-3 border border-info border-opacity-25">
-                    <h6 class="mb-2">
-                        <i class="bi bi-info-circle text-info me-2"></i>
-                        How to Play
-                    </h6>
-                    <small class="text-muted">
-                        • Enter your score for each round<br>
-                        • Try to reach exactly 0 points<br>
-                    </small>
+                {% if progress_games %}
+                <div class="mt-5">
+                    <h5 class="mb-3 text-muted">
+                        <i class="bi bi-clock-history me-2"></i>
+                        Games in Progress
+                    </h5>
+                    <div class="list-group">
+                        {% for game in progress_games %}
+                        <a href="{% url 'game' game_id=game.id %}" class="list-group-item list-group-item-action">
+                            <div class="d-flex w-100 justify-content-between align-items-center">
+                                <div class="flex-grow-1">
+                                    <div class="d-flex align-items-center mb-2 flex-wrap gap-2">
+                                        <h6 class="mb-0 fw-bold">
+                                            <span class="badge bg-primary">{{ game.score }} Points</span>
+                                        </h6>
+                                        <span class="badge bg-info">{{ game.rounds }} Rounds</span>
+                                        <small class="text-muted">
+                                            <i class="bi bi-calendar-event me-1"></i>
+                                            {{ game.date|date:"M d, Y" }}
+                                        </small>
+                                    </div>
+                                    <div class="d-flex align-items-center">
+                                        <i class="bi bi-arrow-clockwise text-muted me-1"></i>
+                                        <small class="text-muted">
+                                            <span class="fw-semibold">{{ game.game_rounds.count }}</span> of <span class="fw-semibold">{{ game.rounds }}</span> rounds played
+                                        </small>
+                                    </div>
+                                </div>
+                                <i class="bi bi-arrow-right-circle text-primary fs-5 ms-3"></i>
+                            </div>
+                        </a>
+                        {% endfor %}
+                    </div>
                 </div>
+                {% endif %}
+
+                <!-- Game Rules -->
+               
             </div>
         </div>
     </div>

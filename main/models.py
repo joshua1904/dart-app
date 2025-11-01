@@ -2,7 +2,7 @@ from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db import models
 from django.db.models import ForeignKey
 from django.utils import timezone
-from main.utils import GAME_STATUS_CHOICES, MULTIPLAYER_GAME_STATUS_CHOICES
+from main.utils import GAME_STATUS_CHOICES, MULTIPLAYER_GAME_STATUS_CHOICES, MultiplayerGameStatus
 import uuid
 
 
@@ -57,6 +57,18 @@ class MultiplayerGame(models.Model):
     session = models.ForeignKey(
         "Session", on_delete=models.CASCADE, related_name="games", null=True
     )
+
+    @property
+    def is_waiting(self):
+        return self.status == MultiplayerGameStatus.WAITING.value
+
+    @property
+    def is_progress(self):
+        return self.status == MultiplayerGameStatus.PROGRESS.value
+    
+    @property
+    def is_finished(self):
+        return self.status == MultiplayerGameStatus.FINISHED.value
 
 
 class MultiplayerRound(models.Model):

@@ -24,6 +24,7 @@
                                 {{ message }}
                             </div>
                         {% endif %}
+                        {%  if game.online %}
                         <div class="d-flex align-items-center">
                             <small class="opacity-75 me-3">Game ID: {{ game.id }}</small>
                             <button class="btn btn-sm btn-outline-light" onclick="copyGameLink()" title="Copy game link">
@@ -31,6 +32,7 @@
                                 Copy Link
                             </button>
                         </div>
+                    {%  endif %}
                     </div>
                 </div>
             </div>
@@ -81,21 +83,7 @@
 
               
              
-              
-
-                <!-- Game Rules -->
-                <div class="game-rules mt-4">
-                    <h6 class="rules-title">
-                        <i class="bi bi-info-circle me-2"></i>
-                        Game Rules
-                    </h6>
-                    <ul class="rules-list">
-                        <li>First player to reach exactly {{ game.score }} points wins</li>
-                        <li>If you go over {{ game.score }} points, your score resets to 0</li>
-                        <li>Players take turns throwing darts</li>
-                        <li>Maximum {{ game.max_players }} players allowed</li>
-                    </ul>
-                </div>
+            
             </div>
         </div>
 
