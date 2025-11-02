@@ -16,7 +16,6 @@ class StatisticsView(views.View):
         multiplayer_games = MultiplayerGame.objects.filter(game_players__player=user)
         round_choices = set(games.values_list("rounds", flat=True))
         score_choices = set(games.values_list("score", flat=True))
-        print(round_choices)
         single_player_filter = GameFilter(
             request.GET,
             queryset=games,

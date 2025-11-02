@@ -8,6 +8,7 @@ from .multiplayer.lobby import Lobby
 from .multiplayer.game import MultiplayerGameView
 from .multiplayer.game_overview import MultiplayerGameOverviewView
 from .single_player.delete_round import DeleteRoundView
+from .auth import SignUpView
 
 __all__ = [
     HomeView.__name__,
@@ -19,4 +20,5 @@ __all__ = [
     MultiplayerGameView.__name__,
     MultiplayerGameOverviewView.__name__,
     DeleteRoundView.__name__,
+    SignUpView.__name__,
 ]
