@@ -223,3 +223,29 @@ main {
     box-shadow: 0 0 0 0.25rem rgba(99, 102, 241, 0.25);
     outline: none;
 }
+
+/* Flash animation for last scored points */
+.score-flash {
+    position: fixed;
+    left: 50%;
+    top: 20%;
+    transform: translateX(-50%);
+    z-index: 2000;
+    font-size: 4rem;
+    font-weight: 800;
+    color: #0a0239; /* dark text for white cards */
+    /* light outline + subtle halo for contrast on white */
+    text-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.95),
+        0 0 10px rgba(255, 255, 255, 0.45),
+        0 6px 18px rgba(0, 0, 0, 0.15);
+    -webkit-text-stroke: 1px rgba(255, 255, 255, 0.5);
+    pointer-events: none;
+    animation: scoreFlash 1s ease-out forwards;
+}
+
+@keyframes scoreFlash {
+    0%   { opacity: 0; transform: translate(-50%, 10px) scale(0.85); }
+    10%  { opacity: 1; transform: translate(-50%, 0) scale(1.2); }
+    100% { opacity: 0; transform: translate(-50%, -10px) scale(1.1); }
+}

@@ -7,6 +7,9 @@
 
 <!-- Modal -->
 {% include "partials/modals/delete_singleplayer_round_modal.html" %}
+{% if last_points %}
+<div class="score-flash">+{{ last_points }}</div>
+{% endif %}
 <!-- Game specific styles -->
 <link rel="stylesheet" href="{% static 'css/game.css' %}">
 

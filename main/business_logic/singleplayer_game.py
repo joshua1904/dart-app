@@ -14,6 +14,8 @@ def get_game_context(game: Game) -> dict:
     average_score = (
         round(total_points_scored / round_count, 1) if round_count > 0 else 0
     )
+    last_round = game.game_rounds.order_by("id").last()
+    last_points = last_round.points if last_round else None
     return {
         "game": game,
         "rounds": rounds,
@@ -23,6 +25,7 @@ def get_game_context(game: Game) -> dict:
         "average_score": average_score,
         "total_points_scored": total_points_scored,
         "progress_percentage": total_points_scored / game.score * 100,
+        "last_points": last_points,
     }
 
 

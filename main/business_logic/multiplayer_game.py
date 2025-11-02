@@ -66,6 +66,8 @@ def get_game_context(game) -> dict:
                 "wins": get_wins(game.session, player),
             }
         )
+    last_round = game.game_rounds.order_by("id").last()
+    last_points = last_round.points if last_round else None
     return {
         "game": game,
         "turn": current_user,
@@ -76,6 +78,7 @@ def get_game_context(game) -> dict:
         "average_points": get_average_points(game, current_user),
         "wins": get_wins(game.session, current_user),
         "queue": queue_list,
+        "last_points": last_points,
     }
 
 
