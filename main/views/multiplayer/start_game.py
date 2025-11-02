@@ -8,8 +8,10 @@ from main.utils import MultiplayerGameStatus
 
 class StartGame(views.View):
     def get(self, request):
+        last_game = MultiplayerGame.objects.filter(creator=request.user).first()
+        score = last_game.score if last_game else 301
         form = MultiplayerGameForm(
-            initial={"max_players": 2, "online": False, "score": 301}
+            initial={"max_players": 2, "online": False, "score": score}
         )
         progress_games = MultiplayerGame.objects.filter(
             game_players__player=request.user

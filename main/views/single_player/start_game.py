@@ -9,7 +9,8 @@ from main.utils import GameStatus
 
 class StartGame(views.View):
     def get(self, request):
-        form = GameForm(initial={"rounds": 3, "score": 121})
+        last_game = Game.objects.filter(player=request.user).first()
+        form = GameForm(initial={"rounds": last_game.rounds if last_game else 3 , "score": last_game.score if last_game else 121})
         progress_games = Game.objects.filter(
             player=request.user, status=GameStatus.PROGRESS.value
         )
@@ -17,8 +18,6 @@ class StartGame(views.View):
             request,
             "single_player/start_game.html",
             context={
-                "rounds": 3,
-                "score": 121,
                 "form": form,
                 "progress_games": progress_games,
             },
@@ -27,11 +26,7 @@ class StartGame(views.View):
     def post(self, request):
         form = GameForm(request.POST)
         if not form.is_valid():
-            return render(
-                request,
-                "single_player/start_game.html",
-                context={"rounds": 3, "score": 121, "form": form},
-            )
+            return redirect(reverse_lazy("singleplayer"))
 
         game = form.save(commit=False)
         game.player = request.user
