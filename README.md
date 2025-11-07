@@ -1,58 +1,56 @@
-## Dart App — Developer Guide
+# ==========================
+# Stage 1: build frontend
+# ==========================
+FROM node:20-alpine AS frontend-builder
 
-A Django 5 + Channels 4 project served via ASGI (Daphne). This guide covers local setup, common commands, and Docker.
+WORKDIR /app/frontend
 
-### Requirements
-- Python 3.12
-- pip
-- (Optional) Docker and Docker Compose
+# Install dependencies
+COPY frontend/package*.json ./
+RUN npm ci --no-audit --no-fund
 
-### Quick start (local)
-```bash
-# From the repo root
-python3 -m venv venv
-source venv/bin/activate
-pip install -r requirements.txt
+# Copy source and build
+COPY frontend/ ./
+RUN npm run build
 
-mkdir db
-python manage.py migrate
-DJANGO_SUPERUSER_PASSWORD='root' python manage.py createsuperuser --username='root' --email='admin@example.com' --noinput
+# ==========================
+# Stage 2: backend (Django + Daphne)
+# ==========================
+FROM python:3.12-slim AS backend
 
-cp .env.example .env
-# Start the dev server (ASGI-aware runserver via Channels)
-python manage.py runserver 0.0.0.0:8000
-```
-App will be available at `http://localhost:8000`.
+# Environment setup
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    DJANGO_SETTINGS_MODULE=dart.settings \
+    PORT=8000
 
-### Running tests
-```bash
-python manage.py test
-```
+# Create app directory
+WORKDIR /app
 
-### Formatting
-```bash
-# Auto-format
-black .
-```
+# Install system deps (for psycopg2, etc.)
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential libpq-dev curl && \
+    rm -rf /var/lib/apt/lists/*
 
-### Static files
-In development, static files are served automatically. For production builds you will need:
-```bash
-python manage.py collectstatic --noinput
-```
+# Install Python deps
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
 
-### Docker
-Build and run using Docker:
-```bash
-docker compose up --build
-# then visit http://localhost:8000
-```
-The container entrypoint runs migrations and serves via Daphne.
+# Copy Django project
+COPY dart/ ./dart/
+COPY main/ ./main/
+COPY manage.py ./
+COPY .env.example .env
 
-### Project layout (high-level)
-- `dart/`: Django project settings and ASGI config
-- `main/`: Application code (models, views, consumers, templates, static)
-  - `consumers/`: WebSocket consumers (Channels)
-  - `business_logic/`: Game and statistics logic
-  - `templates/` and `static/`: UI and assets
-- `db/`: SQLite database location (default for dev)
+# Copy frontend build output (if any)
+COPY --from=frontend-builder /app/frontend/dist ./main/static/frontend/
+
+# Create database folder
+RUN mkdir -p db
+
+# Collect static files for production
+RUN python manage.py collectstatic --noinput
+
+# Entrypoint: run migrations + start Daphne
+CMD python manage.py migrate && \
+    daphne -b 0.0.0.0 -p ${PORT} dart.asgi:application

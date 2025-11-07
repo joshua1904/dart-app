@@ -6,4 +6,5 @@ main/__pycache__/
 */__pycache__/
 *.pyc
 /staticfiles/
-
+/static/
+/frontend/node_modules/
