@@ -14,6 +14,7 @@ export class SimpleKeyBoard extends Component<Props, State> {
         super(props);
         this.state = { points: "" };
     }
+
     handleDigit = (digit: string) => {
         const current = this.state.points ? String(this.state.points) : '';
         const next = current === '0' ? digit : current + digit;
@@ -40,32 +41,6 @@ export class SimpleKeyBoard extends Component<Props, State> {
                     <button type="submit" class="btn btn-primary px-4">
                         <i class="bi bi-check-circle me-2"></i>
                     </button>
-                </div>
-                <div class="row g-2 mt-2">
-                    <div class="col-4">
-                        <div class="form-control form-control-lg text-center"
-                             aria-readonly="true"
-                             tabIndex={-1}
-                             style="font-size: 1.5rem; font-weight: bold; user-select: none; pointer-events: none;">
-                            &nbsp;
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="form-control form-control-lg text-center"
-                             aria-readonly="true"
-                             tabIndex={-1}
-                             style="font-size: 1.5rem; font-weight: bold; user-select: none; pointer-events: none;">
-                            &nbsp;
-                        </div>
-                    </div>
-                    <div class="col-4">
-                        <div class="form-control form-control-lg text-center"
-                             aria-readonly="true"
-                             tabIndex={-1}
-                             style="font-size: 1.5rem; font-weight: bold; user-select: none; pointer-events: none;">
-                            &nbsp;
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="mt-3" aria-label="Numeric keypad">

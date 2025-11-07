@@ -1,7 +1,7 @@
 from django.db.models import Sum
 
 from main.business_logic.utils import get_points_of_round, get_checkout_suggestion
-from main.models import Round, Game
+from main.models import Round, Game, PreferredKeyBoard
 from main.utils import GameStatus
 
 
@@ -16,6 +16,8 @@ def get_game_context(game: Game) -> dict:
     )
     last_round = game.game_rounds.order_by("id").last()
     last_points = last_round.points if last_round else None
+    preferred_keyboard = PreferredKeyBoard.objects.filter(player=game.player).first()
+    keyboard = preferred_keyboard.keyboard if preferred_keyboard else 0
     return {
         "game": game,
         "rounds": rounds,
@@ -26,6 +28,7 @@ def get_game_context(game: Game) -> dict:
         "total_points_scored": total_points_scored,
         "progress_percentage": total_points_scored / game.score * 100,
         "last_points": last_points,
+        "keyboard": keyboard,
     }
 
 

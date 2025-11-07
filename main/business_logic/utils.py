@@ -1,5 +1,7 @@
+from django.contrib.auth.models import User
+
 from main.constants import checkout_map, IMPOSSIBLE_POINTS
-from main.models import Game, MultiplayerGame
+from main.models import Game, MultiplayerGame, PreferredKeyBoard
 
 
 def get_points_of_round(left_score: int, points: int) -> int:
@@ -25,3 +27,11 @@ def delete_last_round(game: Game | MultiplayerGame) -> None:
     round_to_delete = game.game_rounds.last()
     if round_to_delete:
         round_to_delete.delete()
+
+def set_keyboard(user: User, keyboard: int):
+    PreferredKeyBoard.objects.update_or_create(
+        player=user,
+        defaults={
+            "keyboard": keyboard
+        }
+    )

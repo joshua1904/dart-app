@@ -30,4 +30,6 @@ class MultiplayerGameView(views.View):
             messages.info(request, "You are not part of this game!")
             return redirect(reverse_lazy("lobby", kwargs={"game_id": game.id}))
         context = get_game_context(game)
+        keyboard = request.session.get("keyboard", 0)
+        context["keyboard"] = keyboard
         return render(request, "multiplayer/game/game.html", context=context)

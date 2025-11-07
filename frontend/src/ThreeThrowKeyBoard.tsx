@@ -91,15 +91,15 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
     handleSelect = (value: number) => {
         let showValue: string = String(value);
         if (value == 0){
-            return "Miss";
+           showValue = "Miss"
         }
-        if(this.state.type == HitType.S){
+        else if(this.state.type == HitType.S){
             showValue = "S " + showValue;
         }
-        if (this.state.type == HitType.D){
+        else if (this.state.type == HitType.D){
             showValue = "D " + showValue;
         }
-        if (this.state.type == HitType.T){
+        else if (this.state.type == HitType.T){
             showValue = "T " + showValue;
         }
         if(showValue == "D 25") {
@@ -199,7 +199,7 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
                                         const btnClass = `btn btn-lg ${isDisabled ? 'btn-secondary' : 'btn-outline-secondary'}`;
                                         return (
                                             <div class="col-3 d-grid" key={`num-${v}`}>
-                                                <button type="button" class={btnClass} onClick={() => this.handleSelect(v)} disabled={isDisabled}>{v}</button>
+                                                <button type="button" class={btnClass} style="font-size: 1.05rem;" onClick={() => this.handleSelect(v)} disabled={isDisabled}>{v}</button>
                                             </div>
                                         );
                                     })}

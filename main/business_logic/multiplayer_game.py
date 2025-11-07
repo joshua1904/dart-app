@@ -2,7 +2,7 @@ from django.shortcuts import get_object_or_404
 from django.db.models import Sum, Avg
 import logging
 from main.business_logic.utils import get_points_of_round, get_checkout_suggestion
-from main.models import MultiplayerGame, MultiplayerPlayer, MultiplayerRound, Session
+from main.models import MultiplayerGame, MultiplayerPlayer, MultiplayerRound, Session, PreferredKeyBoard
 from main.utils import MultiplayerGameStatus
 from collections import defaultdict
 
@@ -68,6 +68,8 @@ def get_game_context(game) -> dict:
         )
     last_round = game.game_rounds.order_by("id").last()
     last_points = last_round.points if last_round else None
+    preferred_keyboard = PreferredKeyBoard.objects.filter(player=current_user.player).first()
+    keyboard = preferred_keyboard.keyboard if preferred_keyboard else 0
     return {
         "game": game,
         "turn": current_user,
@@ -79,6 +81,7 @@ def get_game_context(game) -> dict:
         "wins": get_wins(game.session, current_user),
         "queue": queue_list,
         "last_points": last_points,
+        "keyboard": keyboard,
     }
 
 

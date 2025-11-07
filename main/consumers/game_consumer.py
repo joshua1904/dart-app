@@ -1,7 +1,7 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
-from main.business_logic.utils import delete_last_round
+from main.business_logic.utils import delete_last_round, set_keyboard
 from main.models import MultiplayerGame
 from django.template.loader import render_to_string
 from urllib.parse import parse_qs
@@ -56,6 +56,11 @@ class GameConsumer(WebsocketConsumer):
                 data.update(parsed)
             except Exception:
                 pass
+        user = self.scope["user"]
+        print(data)
+        keyboard = int(data.get("keyboard") or 0)
+        print(keyboard)
+        set_keyboard(user, keyboard)
         action = data.get("action")
         if action == "new_game":
             self.new_game()
@@ -69,13 +74,12 @@ class GameConsumer(WebsocketConsumer):
             points = 0
         player = self.game.game_players.get(rank=get_turn(self.game))
         if (
-            player.player != self.scope["user"]
+            player.player != user
             and player.player != None
             and not self.game.one_device_manage
         ):
             logger.warning(f"Player {player.player} is not the current player")
             return
-
         # add round returns true if game is ended
         if add_round(self.game, player, int(points)):
             self.create_redirect_all_event(

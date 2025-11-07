@@ -104,3 +104,8 @@ class MultiplayerPlayer(models.Model):
     @property
     def display_name(self):
         return self.player.username if self.player else self.guest_name or ""
+
+
+class PreferredKeyBoard(models.Model):
+    player = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name='keyboard')
+    keyboard = models.IntegerField()
