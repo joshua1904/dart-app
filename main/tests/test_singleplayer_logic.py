@@ -31,7 +31,6 @@ class SingleplayerGameTests(TestCase):
         self.assertEqual(context["rounds"].count(), 0)
         self.assertEqual(context["round_count"], 0)
         self.assertEqual(context["current_score_left"], 501)
-        self.assertEqual(context["checkout_suggestion"], None)  # No checkout for 501
         self.assertEqual(context["average_score"], 0)
         self.assertEqual(context["total_points_scored"], 0)
 
@@ -50,7 +49,6 @@ class SingleplayerGameTests(TestCase):
         self.assertEqual(context["rounds"].count(), 3)
         self.assertEqual(context["round_count"], 3)
         self.assertEqual(context["current_score_left"], 256)  # 501 - 245
-        self.assertEqual(context["checkout_suggestion"], None)  # No checkout for 256
         self.assertEqual(
             context["average_score"], 81.7
         )  # 245 / 3 = 81.666... rounded to 81.7
@@ -66,7 +64,6 @@ class SingleplayerGameTests(TestCase):
         context = get_game_context(game)
 
         self.assertEqual(context["current_score_left"], 100)
-        self.assertEqual(context["checkout_suggestion"], "T20 D20")
 
     def test_get_left_points_new_game(self):
         """Test get_left_points for a new game."""
@@ -93,7 +90,7 @@ class SingleplayerGameTests(TestCase):
         """Test adding a valid round that doesn't end the game."""
         game = self.create_game(score=501, rounds=20)
 
-        status = add_round(game, 60)
+        status = add_round(game, 60, True)
 
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(game.status, GameStatus.PROGRESS.value)
@@ -106,7 +103,7 @@ class SingleplayerGameTests(TestCase):
         game = self.create_game(score=100, rounds=20)
 
         # Add a round that wins the game
-        status = add_round(game, 100)
+        status = add_round(game, 100, True)
 
         # Refresh game from database
         game.refresh_from_db()
@@ -122,7 +119,7 @@ class SingleplayerGameTests(TestCase):
         game = self.create_game(score=50, rounds=20)
 
         # 50 has a valid checkout (S10 D20)
-        status = add_round(game, 50)
+        status = add_round(game, 50, True)
 
         game.refresh_from_db()
 
@@ -135,9 +132,9 @@ class SingleplayerGameTests(TestCase):
         game = self.create_game(score=501, rounds=3)
 
         # Add 3 rounds without winning
-        add_round(game, 100)
-        add_round(game, 100)
-        status = add_round(game, 100)
+        add_round(game, 100, True)
+        add_round(game, 100, True)
+        status = add_round(game, 100, True)
 
         game.refresh_from_db()
 
@@ -150,7 +147,7 @@ class SingleplayerGameTests(TestCase):
         """Test adding points higher than 180 (should be capped at 180)."""
         game = self.create_game(score=501, rounds=20)
 
-        status = add_round(game, 200)
+        status = add_round(game, 200, True)
 
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(game.game_rounds.first().points, 180)  # Capped at 180
@@ -160,7 +157,7 @@ class SingleplayerGameTests(TestCase):
         """Test adding negative points (should be set to 0)."""
         game = self.create_game(score=501, rounds=20)
 
-        status = add_round(game, -50)
+        status = add_round(game, -50, True)
 
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(game.game_rounds.first().points, 0)
@@ -171,7 +168,7 @@ class SingleplayerGameTests(TestCase):
         game = self.create_game(score=50, rounds=20)
 
         # Try to score 51 points (would go to -1, which is a bust)
-        status = add_round(game, 51)
+        status = add_round(game, 51, True)
 
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(game.game_rounds.first().points, 0)  # Bust results in 0 points
@@ -182,7 +179,7 @@ class SingleplayerGameTests(TestCase):
         game = self.create_game(score=50, rounds=20)
 
         # Try to score 49 points (would go to 1, which is a bust)
-        status = add_round(game, 49)
+        status = add_round(game, 49, True)
 
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(game.game_rounds.first().points, 0)  # Bust results in 0 points
@@ -193,7 +190,7 @@ class SingleplayerGameTests(TestCase):
         game = self.create_game(score=169, rounds=20)
 
         # 169 is not a valid checkout (not in checkout_map)
-        status = add_round(game, 169)
+        status = add_round(game, 169, True)
 
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(
@@ -205,14 +202,14 @@ class SingleplayerGameTests(TestCase):
         """Test various valid checkout scenarios."""
         # Test checkout for 2 (D1)
         game = self.create_game(score=2, rounds=20)
-        status = add_round(game, 2)
+        status = add_round(game, 2, True)
         game.refresh_from_db()
         self.assertEqual(status, GameStatus.WON.value)
         self.assertEqual(get_left_points(game), 0)
 
         # Test checkout for 170 (T20 T20 D25)
         game2 = self.create_game(score=170, rounds=20)
-        status = add_round(game2, 170)
+        status = add_round(game2, 170, True)
         game2.refresh_from_db()
         self.assertEqual(status, GameStatus.WON.value)
         self.assertEqual(get_left_points(game2), 0)
@@ -222,27 +219,27 @@ class SingleplayerGameTests(TestCase):
         game = self.create_game(score=301, rounds=10)
 
         # Round 1: 60 points
-        status = add_round(game, 60)
+        status = add_round(game, 60, True)
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(get_left_points(game), 241)
 
         # Round 2: 100 points
-        status = add_round(game, 100)
+        status = add_round(game, 100, True)
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(get_left_points(game), 141)
 
         # Round 3: 85 points
-        status = add_round(game, 85)
+        status = add_round(game, 85, True)
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(get_left_points(game), 56)
 
         # Round 4: Bust attempt (57 points would go to -1)
-        status = add_round(game, 57)
+        status = add_round(game, 57, True)
         self.assertEqual(status, GameStatus.PROGRESS.value)
         self.assertEqual(get_left_points(game), 56)  # No change due to bust
 
         # Round 5: Valid checkout (56 = T16 D4)
-        status = add_round(game, 56)
+        status = add_round(game, 56, True)
         game.refresh_from_db()
         self.assertEqual(status, GameStatus.WON.value)
         self.assertEqual(get_left_points(game), 0)
@@ -267,3 +264,7 @@ class SingleplayerGameTests(TestCase):
         self.assertEqual(context["average_score"], 61.2)
         self.assertEqual(context["total_points_scored"], 245)
         self.assertEqual(context["round_count"], 4)
+    def test_checkout_without_Double(self):
+        game = self.create_game(score=60)
+        status = add_round(game, 60, False)
+        self.assertEqual(game.status, GameStatus.PROGRESS.value)

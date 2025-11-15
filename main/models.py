@@ -107,5 +107,6 @@ class MultiplayerPlayer(models.Model):
 
 
 class PreferredKeyBoard(models.Model):
-    player = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name='keyboard')
+    player = models.ForeignKey("auth.User", on_delete=models.CASCADE, related_name='keyboard', null=True)
+    guest_player = models.ForeignKey("MultiplayerPlayer", on_delete=models.CASCADE, related_name='keyboard', null=True, default=None)
     keyboard = models.IntegerField()

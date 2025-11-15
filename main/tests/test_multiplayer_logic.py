@@ -114,7 +114,6 @@ class MultiplayerGameTests(TestCase):
         self.assertEqual(context["game"], game)
         self.assertEqual(context["turn"].rank, 1)
         self.assertEqual(context["left_score"], 100)
-        self.assertEqual(context["checkout_suggestion"], "T20 D20")  # checkout for 100
 
         # Verify queue structure (should contain players 2, 3, 4 in order)
         self.assertEqual(len(context["queue"]), 3)
@@ -125,7 +124,6 @@ class MultiplayerGameTests(TestCase):
         # All players should start with full score
         for queue_player in context["queue"]:
             self.assertEqual(queue_player["left_score"], 100)
-            self.assertEqual(queue_player["checkout_suggestion"], "T20 D20")
 
         # Add a round for player 1 and test turn 2
         self.add_round_for_player(game, 1, 50)
@@ -142,10 +140,6 @@ class MultiplayerGameTests(TestCase):
         # Player 1 should have 50 points left in the queue
         player_1_in_queue = next(p for p in context["queue"] if p["player"].rank == 1)
         self.assertEqual(player_1_in_queue["left_score"], 50)
-        self.assertEqual(
-            player_1_in_queue["checkout_suggestion"], "S10 D20"
-        )  # checkout for 50
-
         # Test after all players have played one round
         self.add_round_for_player(game, 2, 30)
         self.add_round_for_player(game, 3, 40)
@@ -170,7 +164,7 @@ class MultiplayerGameTests(TestCase):
         self.create_players(game, 1)
         player = self.get_player(game, 1)
 
-        result = add_round(game, player, 50)
+        result = add_round(game, player, 50, True)
 
         self.assertEqual(result, False)
         self.assertEqual(game.status, MultiplayerGameStatus.PROGRESS.value)
@@ -183,7 +177,7 @@ class MultiplayerGameTests(TestCase):
         self.create_players(game, 1)
         player = self.get_player(game, 1)
 
-        result = add_round(game, player, 100)
+        result = add_round(game, player, 100, True)
 
         self.assertEqual(result, True)
         self.assertEqual(game.status, MultiplayerGameStatus.FINISHED.value)
@@ -196,7 +190,7 @@ class MultiplayerGameTests(TestCase):
         self.create_players(game, 1)
         player = self.get_player(game, 1)
 
-        result = add_round(game, player, 169)
+        result = add_round(game, player, 169, True)
 
         self.assertEqual(result, False)
         self.assertEqual(game.status, MultiplayerGameStatus.PROGRESS.value)
@@ -209,12 +203,12 @@ class MultiplayerGameTests(TestCase):
         player = self.get_player(game, 1)
 
         # Test points too high (>180)
-        result1 = add_round(game, player, 181)
+        result1 = add_round(game, player, 181, True)
         self.assertEqual(result1, False)
         self.assertEqual(game.game_rounds.last().points, 0)
 
         # Test negative points
-        result2 = add_round(game, player, -1)
+        result2 = add_round(game, player, -1, True)
         self.assertEqual(result2, False)
         self.assertEqual(game.game_rounds.last().points, 0)
 
@@ -524,3 +518,10 @@ class MultiplayerGameTests(TestCase):
 
         self.assertEqual(guest_in_queue["wins"], 2)
         self.assertEqual(auth2_in_queue["wins"], 0)
+
+    def test_checkout_without_Double(self):
+        game = self.create_game(score=60)
+        self.create_players(game, 1)
+        player = self.get_player(game, 1)
+        add_round(game, player, 60, False)
+        self.assertEqual(game.status, MultiplayerGameStatus.PROGRESS.value)

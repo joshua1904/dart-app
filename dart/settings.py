@@ -152,6 +152,7 @@ if DEBUG:
         "127.0.0.1",
         "localhost",
     ]
+PREACT_COMPONENT_FILE = os.listdir(os.path.join(BASE_DIR, "static", "assets"))[0]
 
 # Auth redirects
 LOGIN_REDIRECT_URL = "/"

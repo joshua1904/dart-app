@@ -32,13 +32,6 @@
                             {% include "partials/player_list.html" %}
                         </div>
                     </div>
-                    <div class="mt-4">
-                        
-                        <!-- Checkout Suggestion -->
-                        {% if checkout_suggestion %}
-                        {% include "partials/checkout_suggestion.html" %}
-                        {% endif %}
-                    </div>
                 </div>
 
                 <!-- Player Queue (Small Display) -->
@@ -50,7 +43,7 @@
                     <form ws-send class="text-center" style="width: 100%; max-width: 320px;">
                         {% csrf_token %}
 
-                    <key-board keyboard="{{ keyboard }}"></key-board>
+                    <key-board keyboard="{{ keyboard }}" score_left="{{ left_score }}"></key-board>
                     </form>
                    
                 </div>

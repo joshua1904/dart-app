@@ -2,40 +2,39 @@ import {Component} from "preact";
 import register from "preact-custom-element";
 
 interface Props {
-
+    points: number;
+    setPoints: (points: number, throwsLeft: number) => void;
 }
 interface State {
-    points: string;
 }
 
 export class SimpleKeyBoard extends Component<Props, State> {
     static tagName = "simple-keyboard";
     constructor(props: Props) {
         super(props);
-        this.state = { points: "" };
     }
 
     handleDigit = (digit: string) => {
-        const current = this.state.points ? String(this.state.points) : '';
+        const current = this.props.points ? String(this.props.points) : '';
         const next = current === '0' ? digit : current + digit;
         const clamped = Math.max(0, Math.min(180, parseInt(next, 10) || 0));
-        this.setState({ points: String(clamped) });
+        this.props.setPoints(clamped);
     }
     handleBackspace = () => {
-        const current = this.state.points ? String(this.state.points) : '';
+        const current = this.props.points ? String(this.props.points) : '';
         const next = current.slice(0, -1);
-        this.setState({ points: next });
+        this.props.setPoints(parseInt(next, 10) || 0);
     }
     render() {
         return <div>
-            <input type="hidden" name="points" value={this.state.points} />
+            <input type="hidden" name="points" value={this.props.points} />
             <div class="mb-3">
                 <div class="input-group input-group-lg">
                     <div class="form-control form-control-lg text-center"
                          aria-readonly="true"
                          tabIndex={-1}
                          style="font-size: 1.5rem; font-weight: bold; user-select: none; pointer-events: none;">
-                        {this.state.points || '0'}
+                        {this.props.points ? String(this.props.points) : '0'}
                     </div>
 
                     <button type="submit" class="btn btn-primary px-4">

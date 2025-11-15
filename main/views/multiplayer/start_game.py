@@ -15,7 +15,7 @@ class StartGame(views.View):
         )
         progress_games = MultiplayerGame.objects.filter(
             game_players__player=request.user
-        ).exclude(status=MultiplayerGameStatus.FINISHED.value)[:5]
+        ).exclude(status=MultiplayerGameStatus.FINISHED.value).order_by("-date")[:5]
         return render(
             request,
             "multiplayer/start_game.html",

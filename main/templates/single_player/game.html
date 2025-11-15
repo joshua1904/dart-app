@@ -56,15 +56,12 @@
 </div>
 
                 <!-- Checkout Suggestion -->
-                {% if checkout_suggestion %}
-                {% include "partials/checkout_suggestion.html" %}
-                {% endif %}
                 </div>
                 <!-- Game Form -->
                 <div class="bg-light rounded-3 p-2">
                     <form method="post" action="" class="needs-validation" novalidate>
                         {% csrf_token %}
-                        <key-board keyboard="{{ keyboard }}"></key-board>
+                        <key-board keyboard="{{ keyboard }}" score_left="{{ current_score_left }}"></key-board>
                     </form>
                 </div>
             </div>

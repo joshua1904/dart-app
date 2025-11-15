@@ -60,9 +60,6 @@ def get_game_context(game) -> dict:
             {
                 "player": player,
                 "left_score": get_left_score(game, player),
-                "checkout_suggestion": get_checkout_suggestion(
-                    get_left_score(game, player)
-                ),
                 "wins": get_wins(game.session, player),
             }
         )
@@ -75,7 +72,7 @@ def get_game_context(game) -> dict:
         "turn": current_user,
         "left_score": get_left_score(game, current_user),
         "checkout_suggestion": get_checkout_suggestion(
-            get_left_score(game, current_user)
+            get_left_score(game, current_user), 3
         ),
         "average_points": get_average_points(game, current_user),
         "wins": get_wins(game.session, current_user),
@@ -85,9 +82,9 @@ def get_game_context(game) -> dict:
     }
 
 
-def add_round(game, player, points) -> bool:
+def add_round(game, player, points, is_valid_checkout: bool) -> bool:
     left_score = get_left_score(game, player)
-    points = get_points_of_round(left_score, points)
+    points = get_points_of_round(left_score, points, is_valid_checkout)
     MultiplayerRound(game=game, player=player, points=points).save()
     if left_score == points:
         game.status = MultiplayerGameStatus.FINISHED.value

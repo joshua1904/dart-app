@@ -2,7 +2,7 @@ import {Component} from "preact";
 import register from "preact-custom-element";
 
 interface Props {
-
+    setPoints: (points: number, throwsLeft: number) => void;
 }
 enum HitType {
     S = 0,
@@ -21,18 +21,50 @@ interface State {
     [Focus.H3]: string;
     focus: Focus;
     type: HitType;
-
+    ended_with_double: boolean;
 }
 export class ThreeThrowKeyBoard extends Component<Props, State> {
     constructor(props: Props) {
         super(props);
-        console.log("ThreeThrowKeyBoard constructor");
-        this.state = { [Focus.H1]: "", [Focus.H2]: "", [Focus.H3]: "", focus: Focus.H1, type: HitType.S};
+        this.state = { [Focus.H1]: "", [Focus.H2]: "", [Focus.H3]: "", focus: Focus.H1, type: HitType.S, ended_with_double: false};
     }
 
     setType = (t: HitType) => {
         this.setState({ type: t });
     }
+
+
+    setEndedWithDouble = () => {
+        const throwsList = [this.state[Focus.H1], this.state[Focus.H2], this.state[Focus.H3]];
+        const lastNonEmpty = [...throwsList].reverse().find(v => v && v.length > 0) || "";
+        const ended = lastNonEmpty.startsWith("D") || lastNonEmpty === "BULL";
+        if (ended !== this.state.ended_with_double) {
+            this.setState({ ended_with_double: ended });
+        }
+    }
+    componentDidUpdate(prevProps: Props, prevState: State) {
+        if (
+            prevState[Focus.H1] !== this.state[Focus.H1] ||
+            prevState[Focus.H2] !== this.state[Focus.H2] ||
+            prevState[Focus.H3] !== this.state[Focus.H3]
+        ) {
+            this.setEndedWithDouble();
+            // no-op here; we notify via setState callbacks to guarantee fresh values
+        }
+    }
+         throws_left = () => {
+             let left_throws = 3
+             if (this.state[Focus.H1]) {
+                 left_throws--
+             }
+             if (this.state[Focus.H2]) {
+                 left_throws--
+             }
+             if (this.state[Focus.H3]) {
+                 left_throws--
+             }
+             return left_throws;
+         }
 
 
     private moveFocusNext = () => {
@@ -47,15 +79,18 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
 
 
     handleBackspace = () => {
-        const current_focus = this.state.focus;
-        if(this.state[current_focus] == "") {
-            this.moveFocusPrev()
-            const new_focus = current_focus > 0 ? current_focus - 1 : current_focus
-            this.setState({[new_focus]: ""})
-
-
+        const currentFocus = this.state.focus;
+        const isCurrentEmpty = (this.state[currentFocus] || "") === "";
+        if (isCurrentEmpty) {
+            const prevFocus = currentFocus === Focus.H3 ? Focus.H2 : (currentFocus === Focus.H2 ? Focus.H1 : Focus.H1);
+            this.setState({ focus: prevFocus, [prevFocus]: "" }, () => {
+                this.props.setPoints(this.get_pointsFromState(), this.throws_left());
+            });
+        } else {
+            this.setState({ [currentFocus]: "" }, () => {
+                this.props.setPoints(this.get_pointsFromState(), this.throws_left());
+            });
         }
-        this.setState({[current_focus]: "" } )
 
     }
     get_pointsFromPointString = (pointString: string | null) => {
@@ -80,11 +115,8 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
     get_pointsFromState = () => {
         let points = 0;
         points += this.get_pointsFromPointString(this.state[Focus.H1]);
-        console.log(points)
         points += this.get_pointsFromPointString(this.state[Focus.H2]);
-                console.log(points)
         points += this.get_pointsFromPointString(this.state[Focus.H3]);
-        console.log(points);
         return points;
     }
 
@@ -105,9 +137,12 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
         if(showValue == "D 25") {
             showValue = "BULL";
         }
-        this.setState({[this.state.focus]: showValue})
+        this.setState({[this.state.focus]: showValue}, () => {
+            this.props.setPoints(this.get_pointsFromState(), this.throws_left());
+        })
         this.setState({type: HitType.S})
         this.moveFocusNext()
+
 
 
 
@@ -132,12 +167,14 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
             <input type="hidden" name="h1" value={this.state[Focus.H1]} />
             <input type="hidden" name="h2" value={this.state[Focus.H2]} />
             <input type="hidden" name="h3" value={this.state[Focus.H3]} />
+
+            <input type="hidden" name="ended_with_double" value={this.state.ended_with_double ? "true" : "false"} />
             <div class="mb-3">
                 <div class="input-group input-group-lg">
                     <div class="form-control form-control-lg text-center"
                          aria-readonly="true"
                          tabIndex={-1}
-                         style="font-size: 1.5rem; font-weight: bold; user-select: none; pointer-events: none;">
+                         style="font-size: 1.0rem; font-weight: bold; user-select: none; pointer-events: none;">
                         {(this.get_pointsFromState() || '0')}
                     </div>
 
@@ -150,7 +187,7 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
                         <div class="form-control form-control-lg text-center"
                              aria-readonly="true"
                              tabIndex={-1}
-                             style="font-size: 1.5rem; font-weight: bold; user-select: none; pointer-events: none;">
+                             style="font-size: 1.0rem; font-weight: bold; user-select: none; pointer-events: none;">
                             {this.state[Focus.H1] || '\u00A0'}
                         </div>
                     </div>
@@ -158,7 +195,7 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
                         <div class="form-control form-control-lg text-center"
                              aria-readonly="true"
                              tabIndex={-1}
-                             style="font-size: 1.5rem; font-weight: bold; user-select: none; pointer-events: none;">
+                             style="font-size: 1.0rem; font-weight: bold; user-select: none; pointer-events: none;">
                             {this.state[Focus.H2] || '\u00A0'}
                         </div>
                     </div>
@@ -166,7 +203,7 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
                         <div class="form-control form-control-lg text-center"
                              aria-readonly="true"
                              tabIndex={-1}
-                             style="font-size: 1.5rem; font-weight: bold; user-select: none; pointer-events: none;">
+                             style="font-size: 1.0rem; font-weight: bold; user-select: none; pointer-events: none;">
                             {this.state[Focus.H3] || '\u00A0'}
                         </div>
                     </div>
@@ -190,16 +227,19 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
                     (() => {
                         const values = Array.from({ length: 20 }, (_, i) => i + 1).concat([25, 0]);
                         const rows: any[] = [];
-                        for (let i = 0; i < values.length; i += 4) {
-                            const slice = values.slice(i, i + 4);
+                        for (let i = 0; i < values.length; i += 5) {
+                            const slice = values.slice(i, i + 5);
+                            const isLastRow = i + 5 >= values.length;
                             rows.push(
-                                <div class="row g-2 justify-content-center mb-2" key={`row-${i}`}>
+                                <div class={`row row-cols-5 g-2 mb-2 ${isLastRow ? 'justify-content-center' : ''}`} key={`row-${i}`}>
                                     {slice.map(v => {
                                         const isDisabled = this.is_disabled(v);
                                         const btnClass = `btn btn-lg ${isDisabled ? 'btn-secondary' : 'btn-outline-secondary'}`;
                                         return (
-                                            <div class="col-3 d-grid" key={`num-${v}`}>
-                                                <button type="button" class={btnClass} style="font-size: 1.05rem;" onClick={() => this.handleSelect(v)} disabled={isDisabled}>{v}</button>
+                                            <div class="col d-grid" key={`num-${v}`}>
+                                                <button type="button" class={btnClass} style="font-size: 0.75rem;" onClick={() => this.handleSelect(v)} disabled={isDisabled}>
+                                                    <span style="display: inline-block; transform: scale(1.4); transform-origin: center;">{v}</span>
+                                                </button>
                                             </div>
                                         );
                                     })}

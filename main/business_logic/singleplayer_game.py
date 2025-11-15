@@ -9,7 +9,6 @@ def get_game_context(game: Game) -> dict:
     rounds = Round.objects.filter(game=game)
     round_count = rounds.count()
     current_score_left = game.score - sum(rounds.values_list("points", flat=True))
-    checkout_suggestion = get_checkout_suggestion(current_score_left)
     total_points_scored = sum(rounds.values_list("points", flat=True))
     average_score = (
         round(total_points_scored / round_count, 1) if round_count > 0 else 0
@@ -23,7 +22,6 @@ def get_game_context(game: Game) -> dict:
         "rounds": rounds,
         "round_count": round_count,
         "current_score_left": current_score_left,
-        "checkout_suggestion": checkout_suggestion,
         "average_score": average_score,
         "total_points_scored": total_points_scored,
         "progress_percentage": total_points_scored / game.score * 100,
@@ -40,9 +38,9 @@ def get_left_points(game: Game) -> int:
     return game.score - total_points
 
 
-def add_round(game: Game, points: int):
+def add_round(game: Game, points: int, is_valid_checkout: bool):
     left_points = get_left_points(game)
-    points = get_points_of_round(left_points, points)
+    points = get_points_of_round(left_points, points, is_valid_checkout)
     Round(game=game, points=points).save()
     left_points -= points
     if left_points == 0:

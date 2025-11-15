@@ -1,4 +1,5 @@
 from django import views
+from django.db.models import Q
 from django.shortcuts import get_object_or_404, render, redirect
 from django.urls import reverse_lazy
 from django.utils import timezone
@@ -9,6 +10,9 @@ from main.utils import GameStatus
 class ResultView(views.View):
     def get(self, request, game_id):
         game = get_object_or_404(Game, id=game_id)
+        if game.date != timezone.now():
+            game.date = timezone.now()
+            game.save()
         rounds = game.game_rounds.all()
 
         total_points = sum(rounds.values_list("points", flat=True))
@@ -16,7 +20,7 @@ class ResultView(views.View):
         score_difference = game.score - total_points
 
         games_today = Game.objects.filter(
-            date=timezone.now(), rounds=game.rounds, score=game.score
+             date=timezone.now(), rounds=game.rounds, score=game.score
         ).order_by("-id")
         last_5 = len(games_today[:5])
         last_5_won = sum(

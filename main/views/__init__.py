@@ -1,3 +1,4 @@
+from .api import CheckoutHintView
 from .home import HomeView
 from .single_player.start_game import StartGame
 from .single_player.game import GameView
@@ -9,6 +10,7 @@ from .multiplayer.game import MultiplayerGameView
 from .multiplayer.game_overview import MultiplayerGameOverviewView
 from .single_player.delete_round import DeleteRoundView
 from .auth import SignUpView
+from .api import CheckoutHintView
 
 __all__ = [
     HomeView.__name__,
@@ -21,4 +23,5 @@ __all__ = [
     MultiplayerGameOverviewView.__name__,
     DeleteRoundView.__name__,
     SignUpView.__name__,
+    CheckoutHintView.__name__,
 ]

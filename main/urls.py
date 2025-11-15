@@ -12,6 +12,7 @@ from .views import (
     MultiplayerGameOverviewView,
     DeleteRoundView,
     SignUpView,
+    CheckoutHintView,
 )
 
 home_urlpatterns = [
@@ -21,6 +22,9 @@ home_urlpatterns = [
         login_required(StatisticsView.as_view()),
         name="statistics",
     ),
+]
+help_urlpatterns = [
+    path("help/checkout-hint/<int:left_score>/<int:throws_left>", CheckoutHintView.as_view(), name="checkout_hint"),
 ]
 
 single_player_urlpatterns = [
@@ -65,7 +69,7 @@ multiplayer_urlpatterns = [
     ),
 ]
 
-urlpatterns = home_urlpatterns + single_player_urlpatterns + multiplayer_urlpatterns
+urlpatterns = home_urlpatterns + single_player_urlpatterns + multiplayer_urlpatterns + help_urlpatterns
 
 # Auth related (signup)
 urlpatterns += [
