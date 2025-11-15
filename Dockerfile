@@ -4,7 +4,7 @@ FROM node:20-bullseye-slim AS frontend-build
 WORKDIR /app
 
 # Copy only what's needed to install and build
-COPY frontend/package*.json frontend/rollup.config.mjs frontend/tsconfig.json ./frontend/
+COPY frontend/package*.json frontend/vite.config.js frontend/tsconfig.json ./frontend/
 COPY frontend/src ./frontend/src
 
 # Ensure output directory exists and build
@@ -36,7 +36,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY . .
 
 # Copy built frontend assets from the Node build stage
-COPY --from=frontend-build /app/static/dist ./static/dist
+COPY --from=frontend-build /app/static ./static
 
 # Run migrations inside CMD (runtime, not build time)
 CMD ["sh", "-c", "python manage.py migrate && daphne -b 0.0.0.0 -p 8000 dart.asgi:application"]
