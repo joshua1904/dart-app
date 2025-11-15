@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>{% block title %}Dart Game{% endblock %}</title>
+
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <!-- Bootstrap 5 CDN -->
@@ -38,9 +38,6 @@
 <body>
     <div class="app-container">
         <!-- Header -->
-        <header>
-            <h1>{% block header %}<a href="{% url 'home' %}"><i class="bi bi-bullseye me-2"></i>Dart</a>{% endblock %}</h1>
-        </header>
         {% if messages %}
           <div class="messages">
             {% for message in messages %}
