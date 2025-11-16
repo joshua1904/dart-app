@@ -14,6 +14,9 @@ import os
 from pathlib import Path
 from decouple import config, Csv
 
+import logging
+
+logger = logging.getLogger(__name__)
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -152,7 +155,11 @@ if DEBUG:
         "127.0.0.1",
         "localhost",
     ]
-PREACT_COMPONENT_FILES = os.listdir(os.path.join(BASE_DIR, "static", "assets"))
+try:
+    PREACT_COMPONENT_FILES = os.listdir(os.path.join(BASE_DIR, "static", "assets"))
+except FileNotFoundError as e:
+    logger.warning("Preact Files not Found!")
+    pass
 PREACT_COMPONENT_FILE = PREACT_COMPONENT_FILES[0] if PREACT_COMPONENT_FILES else ""
 
 # Auth redirects

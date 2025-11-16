@@ -94,7 +94,7 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
 
     }
     get_pointsFromPointString = (pointString: string | null) => {
-        if (!pointString){
+        if (!pointString || pointString == "Miss"){
             return 0;
         }
         if(pointString == "BULL"){

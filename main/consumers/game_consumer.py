@@ -67,6 +67,7 @@ class GameConsumer(WebsocketConsumer):
             self.update_content_event()
             return
         points = data.get("points")
+        print(points)
         if not points:
             points = 0
         player = self.game.game_players.get(rank=get_turn(self.game))
