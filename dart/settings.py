@@ -159,7 +159,7 @@ try:
     PREACT_COMPONENT_FILES = os.listdir(os.path.join(BASE_DIR, "static", "assets"))
 except FileNotFoundError as e:
     logger.warning("Preact Files not Found!")
-    pass
+    PREACT_COMPONENT_FILES = []
 PREACT_COMPONENT_FILE = PREACT_COMPONENT_FILES[0] if PREACT_COMPONENT_FILES else ""
 
 # Auth redirects
