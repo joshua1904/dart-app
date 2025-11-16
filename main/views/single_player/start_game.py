@@ -13,7 +13,7 @@ class StartGame(views.View):
         form = GameForm(initial={"rounds": last_game.rounds if last_game else 3 , "score": last_game.score if last_game else 121})
         progress_games = Game.objects.filter(
             player=request.user, status=GameStatus.PROGRESS.value
-        ).order_by("-date")
+        ).order_by("-date")[:5]
         return render(
             request,
             "single_player/start_game.html",

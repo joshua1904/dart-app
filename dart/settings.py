@@ -25,7 +25,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="test")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = config("DEBUG", default=False)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=Csv())
 
@@ -152,7 +152,8 @@ if DEBUG:
         "127.0.0.1",
         "localhost",
     ]
-PREACT_COMPONENT_FILE = os.listdir(os.path.join(BASE_DIR, "static", "assets"))[0]
+PREACT_COMPONENT_FILES = os.listdir(os.path.join(BASE_DIR, "static", "assets"))
+PREACT_COMPONENT_FILE = PREACT_COMPONENT_FILES[0] if PREACT_COMPONENT_FILES else ""
 
 # Auth redirects
 LOGIN_REDIRECT_URL = "/"
