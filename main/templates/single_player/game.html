@@ -67,12 +67,5 @@
             </div>
         </div>
     </div>
-    <!-- Back to Lobby -->
-<div class="text-center mt-4">
-    <a href="{% url 'home'%}" class="btn btn-outline-secondary">
-        <i class="bi bi-arrow-left me-2"></i>
-        Back to Home
-    </a>
-</div>
-
+{%  include 'partials/back_to_home_button.html' %}
 {% endblock %}

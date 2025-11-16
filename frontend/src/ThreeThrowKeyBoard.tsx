@@ -30,7 +30,13 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
     }
 
     setType = (t: HitType) => {
-        this.setState({ type: t });
+        if (this.state["type"]) {
+            this.setState({type: HitType.S})
+        }
+        else {
+            this.setState({ type: t });
+        }
+
     }
 
 
@@ -234,11 +240,11 @@ export class ThreeThrowKeyBoard extends Component<Props, State> {
                                 <div class={`row row-cols-5 g-2 mb-2 ${isLastRow ? 'justify-content-center' : ''}`} key={`row-${i}`}>
                                     {slice.map(v => {
                                         const isDisabled = this.is_disabled(v);
-                                        const btnClass = `btn btn-lg ${isDisabled ? 'btn-secondary' : 'btn-outline-secondary'}`;
+                                        const btnClass = `btn btn-lg d-flex justify-content-center align-items-center ${isDisabled ? 'btn-secondary' : 'btn-outline-secondary'}`;
                                         return (
                                             <div class="col d-grid" key={`num-${v}`}>
-                                                <button type="button" class={btnClass} style="font-size: 0.75rem;" onClick={() => this.handleSelect(v)} disabled={isDisabled}>
-                                                    <span style="display: inline-block; transform: scale(1.4); transform-origin: center;">{v}</span>
+                                                <button type="button" class={btnClass} style="font-size: 1rem;" onClick={() => this.handleSelect(v)} disabled={isDisabled}>
+                                                    <span style="display: inline-block;">{v}</span>
                                                 </button>
                                             </div>
                                         );
