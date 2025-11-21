@@ -1,4 +1,6 @@
 from dataclasses import dataclass
+from email.policy import default
+
 from django.db.models import QuerySet, Q, Sum, Case, When, Value, IntegerField
 from django.db.models.aggregates import Count
 
@@ -41,9 +43,9 @@ class Statistics:
 
 def _aggregate_rounds(rounds_qs):
     return rounds_qs.aggregate(
-        total_points=Sum("points"),
+        total_points=Sum("points", default=0),
         total_rounds=Count("id"),
-        total_needed_darts=Sum("needed_darts"),
+        total_needed_darts=Sum("needed_darts", default=0),
         sixty_plus=Count(Case(
             When(Q(points__gte=60) & Q(points__lt=80), then=Value(1))
         )),
