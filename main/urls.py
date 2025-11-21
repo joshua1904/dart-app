@@ -13,6 +13,7 @@ from .views import (
     DeleteRoundView,
     SignUpView,
     CheckoutHintView,
+    SetNeededDartsView,
 )
 
 home_urlpatterns = [
@@ -24,7 +25,9 @@ home_urlpatterns = [
     ),
 ]
 help_urlpatterns = [
-    path("help/checkout-hint/<int:left_score>/<int:throws_left>", CheckoutHintView.as_view(), name="checkout_hint"),
+    path("checkout-hint/<int:left_score>/<int:throws_left>/", CheckoutHintView.as_view(), name="checkout_hint"),
+    path("set-needed-darts/singleplayer/<uuid:game_id>/<int:needed_darts>/", SetNeededDartsView.as_view(), name="set-needed-darts-singleplayer"),
+
 ]
 
 single_player_urlpatterns = [

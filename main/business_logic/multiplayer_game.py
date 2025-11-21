@@ -82,11 +82,14 @@ def get_game_context(game) -> dict:
     }
 
 
-def add_round(game, player, points, is_valid_checkout: bool) -> bool:
+def add_round(game, player, points, is_valid_checkout: bool, needed_darts=3) -> bool:
     left_score = get_left_score(game, player)
     points = get_points_of_round(left_score, points, is_valid_checkout)
-    MultiplayerRound(game=game, player=player, points=points).save()
-    if left_score == points:
+    game_won = left_score == points
+    # it is possible that the player missed and dont input a miss, so the needed darts are only set lower than 3 if the game was won
+    cleaned_needed_darts = needed_darts if game_won else 3
+    MultiplayerRound(game=game, player=player, points=points, needed_darts=cleaned_needed_darts).save()
+    if game_won:
         game.status = MultiplayerGameStatus.FINISHED.value
         game.winner = player
         game.save()
@@ -129,6 +132,7 @@ def get_ending_context(game) -> dict:
         "players": get_players_ordered_by_wins(game.session),
         "session_won": game.session.first_to
         and get_wins(game.session, game.winner) == game.session.first_to,
+        "needed_darts": game.game_rounds.last().needed_darts,
     }
 
 

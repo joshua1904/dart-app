@@ -56,3 +56,13 @@ def set_multiplayer_keyboard(player: MultiplayerPlayer, keyboard: int):
             "keyboard": keyboard
         }
     )
+
+
+def get_needed_darts(data: dict) -> int:
+    """get needed darts from requestPost or 3 if not default keyboard was used"""
+    if not data.get("h1"):
+        return 3
+    h1 = 1 if data.get("h1") else 0
+    h2 = 1 if data.get("h2") else 0
+    h3 = 1 if data.get("h3") else 0
+    return h1 + h2 + h3

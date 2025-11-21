@@ -1,0 +1,30 @@
+ <div class="card fade-in" id="needed-darts">
+            <div class="card-header bg-secondary text-white text-center">
+                <h3 class="mb-0">
+                    Needed Darts
+
+                </h3>
+            </div>
+            <div class="card-body text-center">
+                <div class="row">
+                    <div class="col">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-{% if needed_darts == 1 %}primary{% else %}secondary{% endif %}" hx-swap="outerHTML" hx-target="#needed-darts" hx-post="{%  url 'set-needed-darts-singleplayer' game_id=game.id needed_darts=1 %}">1</button>
+                        </form>
+                    </div>
+                     <div class="col">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-{% if needed_darts == 2 %}primary{% else %}secondary{% endif %}" hx-swap="outerHTML" hx-target="#needed-darts" hx-post="{%  url 'set-needed-darts-singleplayer' game_id=game.id needed_darts=2 %}">2</button>
+                        </form>
+                    </div>
+                     <div class="col">
+                        <form method="POST">
+                            {% csrf_token %}
+                            <button class="btn btn-{% if needed_darts == 3 %}primary{% else %}secondary{% endif %}" hx-swap="outerHTML" hx-target="#needed-darts" hx-post="{%  url 'set-needed-darts-singleplayer' game_id=game.id needed_darts=3 %}">3</button>
+                        </form>
+                    </div>
+                </div>  
+            </div>
+ </div>

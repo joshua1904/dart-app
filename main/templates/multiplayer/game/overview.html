@@ -3,7 +3,14 @@
 
 {% block content %}
 <div class="row justify-content-center">
+
+
     <div class="col-12 col-md-10 col-lg-8">
+        {% if  game.winner.player == request.user or game.one_device_manage %}
+        <div class="mb-4">
+            {%  include 'partials/needed_darts_card.html' %}
+        </div>
+{%  endif %}
         <!-- Winner Announcement -->
         <div class="card mb-4 bounce-in">
             <div class="card-body text-center">

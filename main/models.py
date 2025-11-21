@@ -17,7 +17,7 @@ class Game(models.Model):
     rounds = models.IntegerField(validators=[MinValueValidator(0)])
     score = models.IntegerField(validators=[MinValueValidator(0)])
     status = models.IntegerField(choices=GAME_STATUS_CHOICES, default=0)
-    player = ForeignKey("auth.User", on_delete=models.CASCADE)
+    player = ForeignKey("auth.User", on_delete=models.DO_NOTHING)
 
 
 class Round(models.Model):
@@ -26,6 +26,10 @@ class Round(models.Model):
     )
     points = models.IntegerField(
         validators=[MaxValueValidator(180), MinValueValidator(0)]
+    )
+    needed_darts = models.IntegerField(
+        validators=[MaxValueValidator(3), MinValueValidator(1)],
+        default=3
     )
 
 
@@ -83,6 +87,10 @@ class MultiplayerRound(models.Model):
     points = models.IntegerField(
         validators=[MaxValueValidator(180), MinValueValidator(0)]
     )
+    needed_darts = models.IntegerField(
+        validators=[MaxValueValidator(3), MinValueValidator(1)],
+        default=3
+    )
     player = models.ForeignKey(
         "MultiplayerPlayer", on_delete=models.CASCADE, related_name="player_rounds"
     )
@@ -93,7 +101,7 @@ class MultiplayerPlayer(models.Model):
         "MultiplayerGame", on_delete=models.CASCADE, related_name="game_players"
     )
     player = models.ForeignKey(
-        "auth.User", on_delete=models.CASCADE, null=True, blank=True
+        "auth.User", on_delete=models.SET_NULL, null=True, blank=True
     )
     rank = models.IntegerField()
     guest_name = models.CharField(max_length=20, null=True)

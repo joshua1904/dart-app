@@ -38,11 +38,14 @@ def get_left_points(game: Game) -> int:
     return game.score - total_points
 
 
-def add_round(game: Game, points: int, is_valid_checkout: bool):
+def add_round(game: Game, points: int, is_valid_checkout: bool, needed_darts=3):
     left_points = get_left_points(game)
     points = get_points_of_round(left_points, points, is_valid_checkout)
-    Round(game=game, points=points).save()
     left_points -= points
+    game_won = left_points == 0
+    # it is possible that the player missed and dont input a miss, so the needed darts are only set lower than 3 if the game was won
+    cleaned_needed_dars = needed_darts if game_won else 3
+    Round(game=game, points=points, needed_darts=cleaned_needed_dars).save()
     if left_points == 0:
         game.status = GameStatus.WON.value
         game.save()

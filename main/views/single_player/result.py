@@ -43,6 +43,7 @@ class ResultView(views.View):
                 "last_5": last_5,
                 "percentage": last_5_won / last_5 * 100,
                 "category": f"{game.rounds} darts for {game.score} points",
+                "needed_darts": game.game_rounds.last().needed_darts
             },
         )
 

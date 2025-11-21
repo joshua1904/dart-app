@@ -30,7 +30,7 @@ export class KeyBoard extends Component<Props, State> {
      }
      checkoutHint = async (points: number, throwsLeft: number) => {
          const leftScore = parseInt(this.props.score_left) - points;
-         const response = await fetch(`/help/checkout-hint/${leftScore}/${throwsLeft}`);
+         const response = await fetch(`/checkout-hint/${leftScore}/${throwsLeft}`);
          const data = await response.json();
          this.setState({checkoutHint: data.checkout_suggestion});
      }

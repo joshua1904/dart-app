@@ -1,7 +1,7 @@
 import json
 from channels.generic.websocket import WebsocketConsumer
 from asgiref.sync import async_to_sync
-from main.business_logic.utils import delete_last_round, set_keyboard, set_multiplayer_keyboard
+from main.business_logic.utils import delete_last_round, set_keyboard, set_multiplayer_keyboard, get_needed_darts
 from main.models import MultiplayerGame
 from django.template.loader import render_to_string
 from urllib.parse import parse_qs
@@ -67,7 +67,6 @@ class GameConsumer(WebsocketConsumer):
             self.update_content_event()
             return
         points = data.get("points")
-        print(points)
         if not points:
             points = 0
         player = self.game.game_players.get(rank=get_turn(self.game))
@@ -81,8 +80,10 @@ class GameConsumer(WebsocketConsumer):
             return
         ended_with_double = data.get("ended_with_double") == "true"
         is_valid_checkout = (ended_with_double and keyboard == 1) or keyboard == 0
+        needed_darts = get_needed_darts(data)
         # add round returns true if game is ended
-        if add_round(self.game, player, int(points), is_valid_checkout):
+        if add_round(self.game, player, int(points), is_valid_checkout, needed_darts):
+
             self.create_redirect_all_event(
                 f"/multiplayer/game/{self.game_id}/overview/"
             )
