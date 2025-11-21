@@ -5,7 +5,80 @@
 <div class="row justify-content-center g-4">
      <div class="col-12 col-md-8 col-lg-6">
      {% include 'partials/needed_darts_card.html' %}
+
+     
      </div>
+         <!-- Start New Game Card -->
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card fade-in">
+            <div class="card-header bg-secondary text-white text-center">
+                <h3 class="mb-0">
+                    <i class="bi bi-play-circle me-2"></i>
+                    Actions
+                </h3>
+            </div>
+            <div class="card-body text-center">
+                <form method="post" action="{% url 'result' game.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary btn-lg w-100">
+                        <i class="bi bi-arrow-clockwise me-2"></i>
+                        Start New Game
+                    </button>
+                </form>
+                <a href="{% url 'singleplayer' %}" class="btn btn-secondary btn-lg w-100 mt-2">
+                    <i class="bi bi-house me-2"></i>
+                    Back to Home
+                </a>
+            </div>
+        </div>
+    </div>
+      <!-- Game Result Card -->
+    <div class="col-12 col-md-8 col-lg-6">
+        <div class="card bounce-in">
+            <div class="card-header {% if game.status == 1 %}bg-primary{% else %}bg-danger{% endif %} text-white text-center">
+                <h2 class="mb-0">
+                    {% if game.status == 1 %}
+                        🎉 Congratulations! You Won!
+                    {% else %}
+                        💀 Game Over - Better Luck Next Time!
+                    {% endif %}
+                </h2>
+            </div>
+            <div class="card-body text-center">
+                <!-- Game Stats -->
+                <div class="row g-3 mb-4">
+                    <div class="col-6">
+                        <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <i class="bi bi-arrow-clockwise text-primary fs-4 me-2"></i>
+                                <span class="fw-bold text-primary fs-5">{{ game.game_rounds.count }}</span>
+                            </div>
+                            <small class="text-muted">Total Rounds</small>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);">
+                            <div class="d-flex align-items-center justify-content-center mb-2">
+                                <i class="bi bi-star text-primary fs-4 me-2"></i>
+                                <span class="fw-bold text-primary fs-5">{{ total_points }}</span>
+                            </div>
+                            <small class="text-muted">Total Points</small>
+                        </div>
+                    </div>
+                </div>
+
+                {% if game.status == 2 %}
+                <div class="p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25 mb-4">
+                    <div class="d-flex align-items-center justify-content-center mb-2">
+                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
+                        <span class="fw-bold text-warning">Score Difference</span>
+                    </div>
+                    <div class="fs-4 text-warning">{{ score_difference }}</div>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
     <!-- General Stats Card -->
     <div class="col-12 col-md-8 col-lg-6">
 
@@ -52,70 +125,6 @@
                         <div class="progress-bar bg-secondary" role="progressbar" 
                              style="width: {{percentage}}%"></div>
                     </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Game Result Card -->
-    <div class="col-12 col-md-8 col-lg-6">
-        <div class="card bounce-in">
-            <div class="card-header {% if game.status == 1 %}bg-primary{% else %}bg-danger{% endif %} text-white text-center">
-                <h2 class="mb-0">
-                    {% if game.status == 1 %}
-                        🎉 Congratulations! You Won!
-                    {% else %}
-                        💀 Game Over - Better Luck Next Time!
-                    {% endif %}
-                </h2>
-            </div>
-            <div class="card-body text-center">
-                <!-- Game Stats -->
-                <div class="row g-3 mb-4">
-                    <div class="col-6">
-                        <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #e0f2fe 0%, #b3e5fc 100%);">
-                            <div class="d-flex align-items-center justify-content-center mb-2">
-                                <i class="bi bi-arrow-clockwise text-primary fs-4 me-2"></i>
-                                <span class="fw-bold text-primary fs-5">{{ game.game_rounds.count }}</span>
-                            </div>
-                            <small class="text-muted">Total Rounds</small>
-                        </div>
-                    </div>
-                    <div class="col-6">
-                        <div class="p-3 rounded-3" style="background: linear-gradient(135deg, #ede9fe 0%, #ddd6fe 100%);">
-                            <div class="d-flex align-items-center justify-content-center mb-2">
-                                <i class="bi bi-star text-primary fs-4 me-2"></i>
-                                <span class="fw-bold text-primary fs-5">{{ total_points }}</span>
-                            </div>
-                            <small class="text-muted">Total Points</small>
-                        </div>
-                    </div>
-                </div>
-
-                {% if game.status == 2 %}
-                <div class="p-3 bg-warning bg-opacity-10 rounded-3 border border-warning border-opacity-25 mb-4">
-                    <div class="d-flex align-items-center justify-content-center mb-2">
-                        <i class="bi bi-exclamation-triangle text-warning me-2"></i>
-                        <span class="fw-bold text-warning">Score Difference</span>
-                    </div>
-                    <div class="fs-4 text-warning">{{ score_difference }}</div>
-                </div>
-                {% endif %}
-
-                <!-- Action Buttons -->
-                <div class="d-grid gap-3 mt-5">
-                    <a href="{% url 'singleplayer' %}" class="btn btn-outline-secondary btn-lg">
-                        <i class="bi bi-house me-2"></i>
-                        Back to Home
-                    </a>
-
-                    <form method="post" action="{% url 'result' game.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="btn btn-primary btn-lg">
-                            <i class="bi bi-arrow-clockwise me-2"></i>
-                            Start New Game
-                        </button>
-                    </form>
                 </div>
             </div>
         </div>
