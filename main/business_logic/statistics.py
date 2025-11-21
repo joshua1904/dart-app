@@ -9,8 +9,13 @@ from main.models import Game, MultiplayerGame, Round, MultiplayerRound, Multipla
 from main.utils import GameStatus, MultiplayerGameStatus
 
 
-@dataclass
-class Statistics:
+
+
+
+
+
+@dataclass(frozen=True)
+class PartStatistics:
     wins: int = 0
     losses: int = 0
     total_games: int = 0
@@ -22,7 +27,6 @@ class Statistics:
     hundred_plus: int = 0
     hundred_forty_plus: int = 0
     hundred_eighty: int = 0
-    _checkout_rate: int = 0
 
     @property
     def win_rate(self) -> float:
@@ -30,9 +34,6 @@ class Statistics:
             return 0
         return round((self.wins / self.total_games) * 100, 2)
 
-    @property
-    def checkout_rate(self):
-        return round(self._checkout_rate, 2)
     @property
     def loss_rate(self) -> float:
         if self.total_games == 0:
@@ -44,6 +45,31 @@ class Statistics:
         if self.total_darts_needed == 0:
             return 0
         return round(self.total_points / self.total_darts_needed  * 3)
+
+
+@dataclass(frozen=True)
+class Statistics:
+    single_player: PartStatistics
+    multiplayer: PartStatistics
+    checkout_rate: float
+
+    @property
+    def sixty_plus(self):
+        return self.single_player.sixty_plus + self.multiplayer.sixty_plus
+    @property
+    def eighty_plus(self):
+        return self.single_player.eighty_plus + self.multiplayer.eighty_plus
+    @property
+    def hundred_plus(self):
+        return self.single_player.hundred_plus + self.multiplayer.hundred_plus
+    @property
+    def hundred_forty_plus(self):
+        return self.single_player.hundred_forty_plus + self.multiplayer.hundred_forty_plus
+    @property
+    def hundred_eighty(self):
+        return self.single_player.hundred_eighty + self.multiplayer.hundred_eighty
+
+    
 
 
 def _aggregate_rounds(rounds_qs):
@@ -69,20 +95,15 @@ def _aggregate_rounds(rounds_qs):
     )
 
 
-def get_singleplayer_statistics(games: QuerySet[Game]) -> Statistics:
+def get_singleplayer_statistics(games: QuerySet[Game]) -> PartStatistics:
     wins = games.filter(status=GameStatus.WON.value).count()
     losses = games.filter(status=GameStatus.LOST.value).count()
     total_games = games.exclude(status=GameStatus.PROGRESS.value)
     total_rounds = _aggregate_rounds(Round.objects.filter(game__in=total_games))
-    checkout_tries = sum(total_games.values_list("tried_doubles", flat=True))
-    if checkout_tries:
-        checkout_rate = wins / checkout_tries
-    else:
-        checkout_rate = 0
-    return Statistics(wins, losses, total_games.count(), total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0), checkout_rate)
+    return PartStatistics(wins, losses, total_games.count(), total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0))
 
 
-def get_multiplayer_statistics(games: QuerySet[MultiplayerGame], user) -> Statistics:
+def get_multiplayer_statistics(games: QuerySet[MultiplayerGame], user) -> PartStatistics:
     wins = games.filter(winner__player=user).count()
     losses = games.filter(
         ~Q(winner__player=user), status=MultiplayerGameStatus.FINISHED.value
@@ -90,13 +111,23 @@ def get_multiplayer_statistics(games: QuerySet[MultiplayerGame], user) -> Statis
     total_games = games.filter(status=MultiplayerGameStatus.FINISHED.value).count()
     total_rounds = _aggregate_rounds(
         MultiplayerRound.objects.filter(
-            game__in=games, player__player=user
+            game__in=games
         )
     )
-    checkout_tries = sum(MultiplayerPlayer.objects.filter(player=user).values_list("tried_doubles", flat=True) )
-    if checkout_tries:
-        checkout_rate= wins / checkout_tries
-    else:
-        checkout_rate = 0
-    return Statistics(wins, losses, total_games, total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0), checkout_rate)
+    return PartStatistics(wins, losses, total_games, total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0))
 
+
+def get_checkout_rate(singleplayer_games: QuerySet[Game], multiplayer_games: QuerySet[MultiplayerGame], user) -> float:
+    singleplayer_checkout_info = singleplayer_games.aggregate(total_tries=Sum("tried_doubles", default=0), wins=Count("id", filter=Q(tried_doubles__gt=0)))
+    multiplayer_checkout_info= MultiplayerPlayer.objects.filter(game__in=multiplayer_games, player=user).aggregate(total_tries=Sum("tried_doubles", default=0), wins=Count("id", filter=Q(tried_doubles__gt=0)))
+    wins = singleplayer_checkout_info.get("wins", 0) + multiplayer_checkout_info.get("wins", 0)
+    checkout_tries =singleplayer_checkout_info.get("total_tries", 0) + multiplayer_checkout_info.get("total_tries", 0)
+    if checkout_tries == 0:
+        return 0.0
+    return round(wins / checkout_tries * 100, 2)
+
+def get_statistics(games: QuerySet[Game], multiplayer_games: QuerySet[MultiplayerGame], user) -> Statistics:
+    singleplayer_statistics = get_singleplayer_statistics(games)
+    multiplayer_statistics = get_multiplayer_statistics(multiplayer_games, user)
+    checkout_rate= get_checkout_rate(games, multiplayer_games, user)
+    return Statistics(singleplayer_statistics, multiplayer_statistics, checkout_rate)

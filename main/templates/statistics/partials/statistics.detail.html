@@ -1,9 +1,17 @@
-
-            
-             {% include "statistics/partials/game_statistic_cards.html"  with statistics=singleplayer_statistics name='Single player' %}
-             {% include "statistics/partials/game_statistic_cards.html"  with statistics=multiplayer_statistics name='Multiplayer'%}
-            
-            <div class="table-responsive mt-3">
+              <div class="row g-4">
+              
+                <div class="col-sm-6 col-12">
+                    <div class="card shadow-sm border-0 h-100 p-3 bg-light">
+                        <div class="card-body d-flex flex-column align-items-center text-center">
+                            <h2 class="card-title fw-bold text-success display-4 mb-1">
+                                {{ statistics.checkout_rate }}%
+                            </h2>
+                            <p class="text-muted mb-3">Checkout Rate</p>
+                            <div class="position-relative w-100" style="height: 30px;"></div>
+                        </div>
+                    </div>
+                </div>
+              <div class="table-responsive mt-3">
                 <table class="table table-sm table-striped mb-4">
                     <thead>
                         <tr>
@@ -15,27 +23,32 @@
                        
                         <tr>
                             <td>60+</td>
-                            <td>{{ singleplayer_statistics.sixty_plus|add:multiplayer_statistics.sixty_plus }}</td>
+                            <td>{{ statistics.sixty_plus }}</td>
                         </tr>
                         <tr>
                             <td>80+</td>
-                            <td>{{ singleplayer_statistics.eighty_plus|add:multiplayer_statistics.eighty_plus }}</td>
+                            <td>{{ statistics.eighty_plus }}</td>
                         </tr>
                         <tr>
                             <td>100+</td>
-                            <td>{{ singleplayer_statistics.hundred_plus|add:multiplayer_statistics.hundred_plus }}</td>
+                            <td>{{ statistics.hundred_plus }}</td>
                         </tr>
                         <tr>
                             <td>140+</td>
-                            <td>{{ singleplayer_statistics.hundred_forty_plus|add:multiplayer_statistics.hundred_forty_plus }}</td>
+                            <td>{{ statistics.hundred_forty_plus }}</td>
                         </tr>
                         <tr>
                             <td>180</td>
-                            <td>{{ singleplayer_statistics.hundred_eighty|add:multiplayer_statistics.hundred_eighty }}</td>
+                            <td>{{ statistics.hundred_eighty }}</td>
                         </tr>
                     </tbody>
                 </table>
             </div>
+             
+             {% include "statistics/partials/game_statistic_cards.html"  with statistic=statistics.single_player name='Single player' %}
+             {% include "statistics/partials/game_statistic_cards.html"  with statistic=statistics.multiplayer name='Multiplayer'%}
+            
+           
             
              {% include "statistics/partials/collapsebal_table.html" with games=singleplayer_games name='Singleplayer' %}
              {% include "statistics/partials/collapsebal_table.html" with games=multiplayer_games name='Multiplayer' %}

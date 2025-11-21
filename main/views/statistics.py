@@ -2,8 +2,7 @@ from django import views
 from django.shortcuts import render
 
 from main.business_logic.statistics import (
-    get_singleplayer_statistics,
-    get_multiplayer_statistics,
+ get_statistics,
 )
 from main.models import Game, MultiplayerGame, MultiplayerRound
 from main.filter.game_filter import GameFilter, MultiplayerGameFilter
@@ -34,10 +33,7 @@ class StatisticsView(views.View):
                 context={
                     "singleplayer_games": games[:10],
                     "multiplayer_games": multiplayer_games[:10],
-                    "singleplayer_statistics": get_singleplayer_statistics(games),
-                    "multiplayer_statistics": get_multiplayer_statistics(
-                        multiplayer_games, user
-                    ),
+                    "statistics": get_statistics(games, multiplayer_games, user),
                     "filter": single_player_filter,
                 },
             )
@@ -48,10 +44,7 @@ class StatisticsView(views.View):
             context={
                 "singleplayer_games": games[:10],
                 "multiplayer_games": multiplayer_games[:10],
-                "singleplayer_statistics": get_singleplayer_statistics(games),
-                "multiplayer_statistics": get_multiplayer_statistics(
-                    multiplayer_games, user
-                ),
+                "statistics": get_statistics(games, multiplayer_games, user),
                 "filter": single_player_filter,
             },
         )
