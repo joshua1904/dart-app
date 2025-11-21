@@ -4,7 +4,8 @@ from email.policy import default
 from django.db.models import QuerySet, Q, Sum, Case, When, Value, IntegerField
 from django.db.models.aggregates import Count
 
-from main.models import Game, MultiplayerGame, Round, MultiplayerRound
+from main.constants import checkout_map
+from main.models import Game, MultiplayerGame, Round, MultiplayerRound, MultiplayerPlayer
 from main.utils import GameStatus, MultiplayerGameStatus
 
 
@@ -21,6 +22,7 @@ class Statistics:
     hundred_plus: int = 0
     hundred_forty_plus: int = 0
     hundred_eighty: int = 0
+    _checkout_rate: int = 0
 
     @property
     def win_rate(self) -> float:
@@ -28,6 +30,9 @@ class Statistics:
             return 0
         return round((self.wins / self.total_games) * 100, 2)
 
+    @property
+    def checkout_rate(self):
+        return round(self._checkout_rate, 2)
     @property
     def loss_rate(self) -> float:
         if self.total_games == 0:
@@ -69,7 +74,12 @@ def get_singleplayer_statistics(games: QuerySet[Game]) -> Statistics:
     losses = games.filter(status=GameStatus.LOST.value).count()
     total_games = games.exclude(status=GameStatus.PROGRESS.value)
     total_rounds = _aggregate_rounds(Round.objects.filter(game__in=total_games))
-    return Statistics(wins, losses, total_games.count(), total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0))
+    checkout_tries = sum(total_games.values_list("tried_doubles", flat=True))
+    if checkout_tries:
+        checkout_rate = wins / checkout_tries
+    else:
+        checkout_rate = 0
+    return Statistics(wins, losses, total_games.count(), total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0), checkout_rate)
 
 
 def get_multiplayer_statistics(games: QuerySet[MultiplayerGame], user) -> Statistics:
@@ -83,4 +93,10 @@ def get_multiplayer_statistics(games: QuerySet[MultiplayerGame], user) -> Statis
             game__in=games, player__player=user
         )
     )
-    return Statistics(wins, losses, total_games, total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0)) 
+    checkout_tries = sum(MultiplayerPlayer.objects.filter(player=user).values_list("tried_doubles", flat=True) )
+    if checkout_tries:
+        checkout_rate= wins / checkout_tries
+    else:
+        checkout_rate = 0
+    return Statistics(wins, losses, total_games, total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0), checkout_rate)
+

@@ -1,0 +1,28 @@
+<div class="d-flex align-items-center gap-2" id="checkout-misses">
+    <form method="POST" class="m-0">
+        {% csrf_token %}
+        <button
+            class="btn btn-outline-light btn-sm px-2"
+            hx-post="{{decrement_url}}"
+            hx-target="#checkout-misses"
+            hx-swap="outerHTML"
+            aria-label="Decrement"
+            title="Decrement"
+        >-</button>
+    </form>
+
+    <span class="mx-2 small">{{ tried_doubles|default:0 }}</span>
+
+    <form method="POST" class="m-0">
+        {% csrf_token %}
+        <button
+            class="btn btn-outline-light btn-sm px-2"
+            hx-post="{{increment_url}}"
+            hx-target="#checkout-misses"
+            hx-swap="outerHTML"
+            aria-label="Increment"
+            title="Increment"
+        >+</button>
+    </form>
+</div>
+

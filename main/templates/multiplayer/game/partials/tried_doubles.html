@@ -1,0 +1,3 @@
+{% url 'set-checkout-misses-multiplayer' player_id=turn.id operator='plus' as increment_url %}
+{% url 'set-checkout-misses-multiplayer' player_id=turn.id operator='minus' as decrement_url %}
+{% include "partials/checkout_misses.html" with tried_doubles=turn.tried_doubles increment_url=increment_url decrement_url=decrement_url %}

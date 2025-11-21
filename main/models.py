@@ -18,6 +18,7 @@ class Game(models.Model):
     score = models.IntegerField(validators=[MinValueValidator(0)])
     status = models.IntegerField(choices=GAME_STATUS_CHOICES, default=0)
     player = ForeignKey("auth.User", on_delete=models.DO_NOTHING)
+    tried_doubles = models.IntegerField(validators=[MinValueValidator(0)], default=0)
 
 
 class Round(models.Model):
@@ -105,6 +106,7 @@ class MultiplayerPlayer(models.Model):
     )
     rank = models.IntegerField()
     guest_name = models.CharField(max_length=20, null=True)
+    tried_doubles = models.IntegerField(validators=[MinValueValidator(0)], default=0)
 
     def __str__(self):
         return self.player.username if self.player else self.guest_name or ""

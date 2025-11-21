@@ -1,6 +1,7 @@
 {% include "partials/modals/delete_multiplayer_round_modal.html" %}
 {% load static %}
 
+
 {% if last_points %}
 <div class="score-flash">+{{ last_points }}</div>
 {% endif %}
@@ -11,6 +12,9 @@
                     <button type="button" class="btn btn-outline-warning btn-sm" data-bs-toggle="modal" data-bs-target="#deleteRoundModal" aria-label="Delete Last Round" title="Delete Last Round" style="min-height: 36px;">
                         <i class="bi bi-arrow-counterclockwise"></i>
                     </button>
+                    <div class="float-end">
+                        {% include "multiplayer/game/partials/tried_doubles.html" %}
+                    </div>
             </div>
             <div class="card-body">
                 <!-- Current Player (Big Display) -->

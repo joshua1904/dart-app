@@ -1,5 +1,7 @@
 from django.urls import path
 from django.contrib.auth.decorators import login_required
+
+from main.views.api import SetSinglePlayerCheckoutMissView, SetMultiplayerCheckoutMissView
 from .views import (
     HomeView,
     StartGame,
@@ -27,6 +29,8 @@ home_urlpatterns = [
 help_urlpatterns = [
     path("checkout-hint/<int:left_score>/<int:throws_left>/", CheckoutHintView.as_view(), name="checkout_hint"),
     path("set-needed-darts/singleplayer/<uuid:game_id>/<int:needed_darts>/", SetNeededDartsView.as_view(), name="set-needed-darts-singleplayer"),
+    path("set-checkout-misses/singleplayer/<uuid:game_id>/<str:operator>/", SetSinglePlayerCheckoutMissView.as_view(), name="set-checkout-misses-singleplayer"),
+    path("set-checkout-misses/multiplayer/<int:player_id>/<str:operator>/", SetMultiplayerCheckoutMissView.as_view(), name="set-checkout-misses-multiplayer"),
 
 ]
 

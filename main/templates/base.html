@@ -62,5 +62,18 @@
     <!-- Bootstrap Bundle JS (includes Popper) -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="{% preact_bundle %}"></script>
+    <script>
+        // Ensure all HTMX requests include the CSRF token from the cookie
+        document.body.addEventListener('htmx:configRequest', function (event) {
+            function getCookie(name) {
+                const match = document.cookie.match(new RegExp('(^| )' + name + '=([^;]+)'));
+                return match ? decodeURIComponent(match[2]) : null;
+            }
+            const token = getCookie('csrftoken');
+            if (token) {
+                event.detail.headers['X-CSRFToken'] = token;
+            }
+        });
+    </script>
 </body>
 </html>

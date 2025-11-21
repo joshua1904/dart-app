@@ -27,6 +27,8 @@ def get_game_context(game: Game) -> dict:
         "progress_percentage": total_points_scored / game.score * 100,
         "last_points": last_points,
         "keyboard": keyboard,
+        "tried_doubles": game.tried_doubles,
+
     }
 
 
@@ -46,7 +48,7 @@ def add_round(game: Game, points: int, is_valid_checkout: bool, needed_darts=3):
     # it is possible that the player missed and dont input a miss, so the needed darts are only set lower than 3 if the game was won
     cleaned_needed_dars = needed_darts if game_won else 3
     Round(game=game, points=points, needed_darts=cleaned_needed_dars).save()
-    if left_points == 0:
+    if game_won:
         game.status = GameStatus.WON.value
         game.save()
         return game.status
