@@ -1,8 +1,10 @@
+import json
+
 from django import views
 from django.shortcuts import render
 
 from main.business_logic.statistics import (
- get_statistics,
+    get_statistics, get_avg_per_week_singleplayer, get_avg_per_week_multiplayer,
 )
 from main.models import Game, MultiplayerGame, MultiplayerRound
 from main.filter.game_filter import GameFilter, MultiplayerGameFilter
@@ -46,5 +48,7 @@ class StatisticsView(views.View):
                 "multiplayer_games": multiplayer_games[:10],
                 "statistics": get_statistics(games, multiplayer_games, user),
                 "filter": single_player_filter,
+                "week_avg_singleplayer": json.dumps(get_avg_per_week_singleplayer(games)),
+                "week_avg_multiplayer": json.dumps(get_avg_per_week_multiplayer(multiplayer_games))
             },
         )

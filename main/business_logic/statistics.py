@@ -1,14 +1,15 @@
 from dataclasses import dataclass
 from email.policy import default
 
-from django.db.models import QuerySet, Q, Sum, Case, When, Value, IntegerField
+from django.db.models import QuerySet, Q, Sum, Case, When, Value, IntegerField, Avg
 from django.db.models.aggregates import Count
+from django.db.models.functions import TruncWeek
 
 from main.constants import checkout_map
 from main.models import Game, MultiplayerGame, Round, MultiplayerRound, MultiplayerPlayer
 from main.utils import GameStatus, MultiplayerGameStatus
 
-
+from datetime import datetime
 
 
 
@@ -131,3 +132,15 @@ def get_statistics(games: QuerySet[Game], multiplayer_games: QuerySet[Multiplaye
     multiplayer_statistics = get_multiplayer_statistics(multiplayer_games, user)
     checkout_rate= get_checkout_rate(games, multiplayer_games, user)
     return Statistics(singleplayer_statistics, multiplayer_statistics, checkout_rate)
+
+def get_avg_per_week_singleplayer(games: QuerySet[Game]):
+    rounds = Round.objects.filter(game__in=games) or MultiplayerRound.objects.filter(game__in=games)
+    return _get_avg_json(rounds)
+def get_avg_per_week_multiplayer(games: QuerySet[MultiplayerGame]):
+    rounds = MultiplayerRound.objects.filter(game__in=games)
+    return _get_avg_json(rounds)
+
+def _get_avg_json(rounds: QuerySet[MultiplayerRound] | QuerySet[Round]) -> list:
+    week_avgs = rounds.annotate(
+        week=TruncWeek("game__date")).values("week").annotate(avg=Avg("points")).order_by("week")
+    return [{"x": datetime.strftime(i.get('week'), '%Y-%W'), "y": i.get("avg")} for i in week_avgs]

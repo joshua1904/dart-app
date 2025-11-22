@@ -2,6 +2,7 @@
 
 {% block content %}
 <div class="row justify-content-center g-4">
+
     <div class="col-12 col-md-8 col-lg-6">
         <div class="card fade-in">
             <div class="card-header bg-secondary text-white text-center">
@@ -16,8 +17,13 @@
             <div class="card-body" id="card-content">
                {% include 'statistics/partials/statistics.detail.html' %}
             </div>
+
         </div>
     </div>
+
 </div>
 {%  include 'partials/back_to_home_button.html' %}
+{% endblock %}
+{% block extra_scripts %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 {% endblock %}

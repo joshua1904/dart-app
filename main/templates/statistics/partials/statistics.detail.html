@@ -48,8 +48,8 @@
                 </table>
             </div>
              
-             {% include "statistics/partials/game_statistic_cards.html"  with statistic=statistics.single_player name='Single player' %}
-             {% include "statistics/partials/game_statistic_cards.html"  with statistic=statistics.multiplayer name='Multiplayer'%}
+             {% include "statistics/partials/game_statistic_cards.html"  with statistic=statistics.single_player name='Single player' week_avg=week_avg_singleplayer %}
+             {% include "statistics/partials/game_statistic_cards.html"  with statistic=statistics.multiplayer name='Multiplayer' week_avg=week_avg_multiplayer %}
             
            
             
