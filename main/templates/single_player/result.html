@@ -4,7 +4,9 @@
 {% block content %}
 <div class="row justify-content-center g-4">
      <div class="col-12 col-md-8 col-lg-6">
+         {% if game.status == 1 %}
      {% include 'partials/needed_darts_card.html' %}
+         {%  endif %}
 
      
      </div>

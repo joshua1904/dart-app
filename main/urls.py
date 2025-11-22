@@ -27,10 +27,10 @@ home_urlpatterns = [
     ),
 ]
 help_urlpatterns = [
-    path("checkout-hint/<int:left_score>/<int:throws_left>/", CheckoutHintView.as_view(), name="checkout_hint"),
-    path("set-needed-darts/singleplayer/<uuid:game_id>/<int:needed_darts>/", SetNeededDartsView.as_view(), name="set-needed-darts-singleplayer"),
-    path("set-checkout-misses/singleplayer/<uuid:game_id>/<str:operator>/", SetSinglePlayerCheckoutMissView.as_view(), name="set-checkout-misses-singleplayer"),
-    path("set-checkout-misses/multiplayer/<int:player_id>/<str:operator>/", SetMultiplayerCheckoutMissView.as_view(), name="set-checkout-misses-multiplayer"),
+    path("checkout-hint/<int:left_score>/<int:throws_left>/", login_required(CheckoutHintView.as_view()), name="checkout_hint"),
+    path("set-needed-darts/singleplayer/<uuid:game_id>/<int:needed_darts>/", login_required(SetNeededDartsView.as_view()), name="set-needed-darts-singleplayer"),
+    path("set-checkout-misses/singleplayer/<uuid:game_id>/<str:operator>/", login_required(SetSinglePlayerCheckoutMissView.as_view()), name="set-checkout-misses-singleplayer"),
+    path("set-checkout-misses/multiplayer/<int:player_id>/<str:operator>/", login_required(SetMultiplayerCheckoutMissView.as_view()), name="set-checkout-misses-multiplayer"),
 
 ]
 
