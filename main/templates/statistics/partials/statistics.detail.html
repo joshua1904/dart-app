@@ -25,6 +25,10 @@
                     <tbody>
                        
                         <tr>
+                            <td>26</td>
+                            <td>{{ statistics.twenty_six }}</td>
+                        </tr>
+                        <tr>
                             <td>60+</td>
                             <td>{{ statistics.sixty_plus }}</td>
                         </tr>
@@ -53,5 +57,5 @@
             
            
             
-             {% include "statistics/partials/collapsebal_table.html" with games=singleplayer_games name='Singleplayer' %}
-             {% include "statistics/partials/collapsebal_table.html" with games=multiplayer_games name='Multiplayer' %}
+             {% include "statistics/partials/collapsebal_table_singleplayer.html" with games=singleplayer_games name='Singleplayer' %}
+             {% include "statistics/partials/collapsebal_table_multiplayer.html" with games=multiplayer_games name='Multiplayer' %}

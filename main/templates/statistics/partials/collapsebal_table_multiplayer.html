@@ -1,0 +1,43 @@
+<div class="container py-4">
+
+    <!-- 1. The Toggle Button -->
+    <button
+        class="btn btn-primary mb-3 w-100"
+        type="button"
+        data-bs-toggle="collapse"
+        data-bs-target="#gameStatisticsCollapse_{{name}}"
+        aria-expanded="true"
+        aria-controls="gameStatisticsCollapse_{{name}}">
+    {{name}} ↓</button>
+    <!-- 2. The Collapsible Content Wrapper -->
+    <!-- The 'collapse' class hides the content initially. Remove it or add 'show' if you want it open by default. -->
+    <div class="collapse" id="gameStatisticsCollapse_{{name}}">
+        <!-- 3. The Table Content -->
+        <div class="table-responsive shadow-sm rounded-3">
+            <table id="statistics-table" class="table table-striped table-hover mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Score</th>
+                        <th>Rounds</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for game in games %}
+                        <tr>
+                            <td>{{ game.score }}</td>
+                            <td>{{ game.game_rounds.count }}</td>
+                            {% if not game.winner %}
+                                <td>{{ game.get_status_display }}</td>
+                            {% elif game.winner.player == request.user %}
+                            <td>WON</td>
+                            {%  else %}
+                        <td>LOST</td>
+                        {%  endif %}
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

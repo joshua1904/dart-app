@@ -1,11 +1,8 @@
 from dataclasses import dataclass
-from email.policy import default
-
-from django.db.models import QuerySet, Q, Sum, Case, When, Value, IntegerField, Avg
+from django.db.models import QuerySet, Q, Sum, Case, When, Value, Avg
 from django.db.models.aggregates import Count
 from django.db.models.functions import TruncWeek
 
-from main.constants import checkout_map
 from main.models import Game, MultiplayerGame, Round, MultiplayerRound, MultiplayerPlayer
 from main.utils import GameStatus, MultiplayerGameStatus
 
@@ -28,6 +25,7 @@ class PartStatistics:
     hundred_plus: int = 0
     hundred_forty_plus: int = 0
     hundred_eighty: int = 0
+    twenty_six: int = 0
 
     @property
     def win_rate(self) -> float:
@@ -69,6 +67,9 @@ class Statistics:
     @property
     def hundred_eighty(self):
         return self.single_player.hundred_eighty + self.multiplayer.hundred_eighty
+    @property
+    def twenty_six(self):
+        return self.single_player.twenty_six + self.multiplayer.twenty_six
 
     
 
@@ -93,6 +94,9 @@ def _aggregate_rounds(rounds_qs):
         hundred_eighty=Count(Case(
             When(points=180, then=Value(1))
         )),
+        twenty_six=Count(Case(
+            When(points=26, then=Value(1))
+        ))
     )
 
 
@@ -101,7 +105,7 @@ def get_singleplayer_statistics(games: QuerySet[Game]) -> PartStatistics:
     losses = games.filter(status=GameStatus.LOST.value).count()
     total_games = games.exclude(status=GameStatus.PROGRESS.value)
     total_rounds = _aggregate_rounds(Round.objects.filter(game__in=total_games))
-    return PartStatistics(wins, losses, total_games.count(), total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0))
+    return PartStatistics(wins, losses, total_games.count(), total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0), total_rounds.get("twenty_six", 0))
 
 
 def get_multiplayer_statistics(games: QuerySet[MultiplayerGame], user) -> PartStatistics:
@@ -115,7 +119,7 @@ def get_multiplayer_statistics(games: QuerySet[MultiplayerGame], user) -> PartSt
             game__in=games
         )
     )
-    return PartStatistics(wins, losses, total_games, total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0))
+    return PartStatistics(wins, losses, total_games, total_rounds.get("total_points", 0), total_rounds.get("total_rounds", 0), total_rounds.get("total_needed_darts", 0), total_rounds.get("sixty_plus", 0), total_rounds.get("eighty_plus", 0), total_rounds.get("hundred_plus", 0), total_rounds.get("hundred_forty_plus", 0), total_rounds.get("hundred_eighty", 0), total_rounds.get("twenty_six", 0))
 
 
 def get_checkout_rate(singleplayer_games: QuerySet[Game], multiplayer_games: QuerySet[MultiplayerGame], user) -> float:
