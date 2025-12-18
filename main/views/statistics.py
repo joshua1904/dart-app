@@ -35,8 +35,8 @@ class StatisticsView(views.View):
                 request,
                 "statistics/partials/statistics.detail.html",
                 context={
-                    "singleplayer_games": games[game_slice][::-1],
-                    "multiplayer_games": multiplayer_games[multiplayer_game_slice][::-1],
+                    "singleplayer_games": games[game_slice:][::-1],
+                    "multiplayer_games": multiplayer_games[multiplayer_game_slice:][::-1],
                     "statistics": get_statistics(games, multiplayer_games, user),
                     "filter": single_player_filter,
                 },
@@ -46,8 +46,8 @@ class StatisticsView(views.View):
             request,
             "statistics/statistics.html",
             context={
-                "singleplayer_games": games[game_slice][::-1],
-                "multiplayer_games": multiplayer_games[multiplayer_game_slice][::-1],
+                "singleplayer_games": games[game_slice:][::-1],
+                "multiplayer_games": multiplayer_games[multiplayer_game_slice:][::-1],
                 "statistics": get_statistics(games, multiplayer_games, user),
                 "filter": single_player_filter,
                 "week_avg_singleplayer": json.dumps(get_avg_per_week_singleplayer(games)),
