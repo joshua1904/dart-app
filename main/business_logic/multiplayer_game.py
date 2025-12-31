@@ -65,7 +65,10 @@ def get_game_context(game) -> dict:
         )
     last_round = game.game_rounds.order_by("id").last()
     last_points = last_round.points if last_round else None
-    preferred_keyboard = PreferredKeyBoard.objects.filter(player=current_user.player).first()
+    if current_user.player:
+        preferred_keyboard = PreferredKeyBoard.objects.filter(player=current_user.player).first()
+    else:
+        preferred_keyboard = PreferredKeyBoard.objects.filter(guest_player=current_user).first()
     keyboard = preferred_keyboard.keyboard if preferred_keyboard else 0
     return {
         "game": game,
