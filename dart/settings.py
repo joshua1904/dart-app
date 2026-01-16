@@ -28,9 +28,23 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = config("SECRET_KEY", default="test")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = config("DEBUG", default=False)
+DEBUG = config("DEBUG", default=False, cast=bool)
 
 ALLOWED_HOSTS = config("ALLOWED_HOSTS", default="127.0.0.1,localhost", cast=Csv())
+# In DEBUG, permit all hosts to avoid DisallowedHost during development or on staging
+if DEBUG:
+    ALLOWED_HOSTS = ["*"]
+
+# When behind a reverse proxy/HTTPS terminator, ensure Django recognizes HTTPS
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+USE_X_FORWARDED_HOST = config("USE_X_FORWARDED_HOST", default=True, cast=bool)
+
+# CSRF: allow your HTTPS origins (scheme is required)
+CSRF_TRUSTED_ORIGINS = config(
+    "CSRF_TRUSTED_ORIGINS",
+    default="https://tewes-darts.de,https://www.tewes-darts.de",
+    cast=Csv(),
+)
 
 
 # Application definition
