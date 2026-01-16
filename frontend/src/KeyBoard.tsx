@@ -2,7 +2,6 @@ import {Component} from "preact";
 import register from "preact-custom-element";
 import { ThreeThrowKeyBoard } from "./ThreeThrowKeyBoard";
 import { SimpleKeyBoard } from "./SimpleKeyBoard";
-import {parseAst} from "vite";
 
 enum KeyboardType {
     simple = 0,
@@ -54,7 +53,11 @@ export class KeyBoard extends Component<Props, State> {
     }
      render() {
         return <>
-            {this.state.checkoutHint && <div className="alert alert-info mb-4 text-center">{this.state.checkoutHint}</div>}
+            {this.state.checkoutHint && (
+                <div className="alert alert-info mb-3 py-1 px-2 text-center">
+                    <small>{this.state.checkoutHint}</small>
+                </div>
+            )}
             <input type="hidden" name="keyboard" value={this.state.keyboard}/>
             {this.state.keyboard == KeyboardType.simple ? <SimpleKeyBoard points={this.state.points} setPoints={this.setPoints}/> : <ThreeThrowKeyBoard setPoints={this.setPoints}/>}
             <div className="d-flex justify-content-end mb-2">

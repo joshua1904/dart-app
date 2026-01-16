@@ -18,9 +18,10 @@
             </div>
             <div class="card-body">
                 <!-- Current Player (Big Display) -->
-                <div class="text-center mb-4">
+                <div class="text-center mb-2">
+                    {% if queue|length == 0 %}
                     <div class="row">
-                        <div class="col-md-6">
+                        <div class="col-12">
                             <h3 class="text-primary">
                                 {{ turn }}
                                 {% if wins > 0 %}
@@ -32,10 +33,26 @@
                             <small class="text-muted">Avg: {{ average_points|floatformat:1 }}</small>
                             {% endif %}
                         </div>
-                        <div class="col-md-6">
+                    </div>
+                    {% else %}
+                    <div class="row align-items-center">
+                        <div class="col-6 d-flex flex-column justify-content-center">
+                            <h3 class="text-primary">
+                                {{ turn }}
+                                {% if wins > 0 %}
+                                <span class="badge bg-primary ms-2">{{ wins }}</span>
+                                {% endif %}
+                            </h3>
+                            <h1 class="display-4 fw-bold text-primary">{{ left_score }}</h1>
+                            {% if average_points %}
+                            <small class="text-muted">Avg: {{ average_points|floatformat:1 }}</small>
+                            {% endif %}
+                        </div>
+                        <div class="col-6">
                             {% include "partials/player_list.html" %}
                         </div>
                     </div>
+                    {% endif %}
                 </div>
 
                 <!-- Player Queue (Small Display) -->
