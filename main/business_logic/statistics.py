@@ -138,7 +138,7 @@ def get_statistics(games: QuerySet[Game], multiplayer_games: QuerySet[Multiplaye
     return Statistics(singleplayer_statistics, multiplayer_statistics, checkout_rate)
 
 def get_avg_per_week_singleplayer(games: QuerySet[Game]):
-    rounds = Round.objects.filter(game__in=games) or MultiplayerRound.objects.filter(game__in=games)
+    rounds = Round.objects.filter(game__in=games)
     return _get_avg_json(rounds)
 def get_avg_per_week_multiplayer(games: QuerySet[MultiplayerGame]):
     rounds = MultiplayerRound.objects.filter(game__in=games)

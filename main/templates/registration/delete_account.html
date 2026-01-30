@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block content %}
+<link rel="stylesheet" href="{% static 'css/login.css' %}">
+
+<div class="row justify-content-center">
+    <div class="col-md-7 col-lg-6">
+        <div class="card fade-in border-danger">
+            <div class="card-header text-center">
+                <h3 class="mb-0 text-danger">
+                    <i class="bi bi-trash3 me-2"></i>
+                    Delete account
+                </h3>
+                <p class="text-muted mt-2">This action is permanent.</p>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning" role="alert">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    Deleting your account removes your single player games and cannot be undone.
+                </div>
+
+                <form method="post" novalidate>
+                    {% csrf_token %}
+                    <div class="d-grid gap-2">
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="bi bi-trash3 me-2"></i>
+                            Permanently delete account
+                        </button>
+                        <a href="{% url 'home' %}" class="btn btn-outline-secondary btn-lg">
+                            Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

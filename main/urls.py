@@ -14,6 +14,7 @@ from .views import (
     MultiplayerGameOverviewView,
     DeleteRoundView,
     SignUpView,
+    DeleteAccountView,
     CheckoutHintView,
     SetNeededDartsView,
 )
@@ -81,4 +82,9 @@ urlpatterns = home_urlpatterns + single_player_urlpatterns + multiplayer_urlpatt
 # Auth related (signup)
 urlpatterns += [
     path("accounts/signup/", SignUpView.as_view(), name="signup"),
+    path(
+        "accounts/delete/",
+        login_required(DeleteAccountView.as_view()),
+        name="delete_account",
+    ),
 ]

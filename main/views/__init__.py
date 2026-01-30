@@ -9,7 +9,7 @@ from .multiplayer.lobby import Lobby
 from .multiplayer.game import MultiplayerGameView
 from .multiplayer.game_overview import MultiplayerGameOverviewView
 from .single_player.delete_round import DeleteRoundView
-from .auth import SignUpView
+from .auth import SignUpView, DeleteAccountView
 from .api import CheckoutHintView, SetNeededDartsView
 
 __all__ = [
@@ -23,6 +23,7 @@ __all__ = [
     MultiplayerGameOverviewView.__name__,
     DeleteRoundView.__name__,
     SignUpView.__name__,
+    DeleteAccountView.__name__,
     CheckoutHintView.__name__,
     SetNeededDartsView.__name__,
 ]
