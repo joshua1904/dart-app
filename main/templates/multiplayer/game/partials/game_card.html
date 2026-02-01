@@ -5,7 +5,7 @@
 {% if last_points %}
 <div class="score-flash">+{{ last_points }}</div>
 {% endif %}
-<div class="col-12 col-md-10 col-lg-8">
+<div class="col-12">
         <!-- Game Status and Player Queue -->
         <div class="card">
             <div class="card-header bg-primary text-white text-left py-2">
@@ -17,10 +17,11 @@
                     </div>
             </div>
             <div class="card-body">
+                <div class="game-card-stack">
                 <!-- Current Player (Big Display) -->
                 <div class="text-center mb-2">
                     {% if queue|length == 0 %}
-                    <div class="row">
+                    <div class="row game-card-row">
                         <div class="col-12">
                             <h3 class="text-primary">
                                 {{ turn }}
@@ -35,7 +36,7 @@
                         </div>
                     </div>
                     {% else %}
-                    <div class="row align-items-center">
+                    <div class="row align-items-center game-card-row">
                         <div class="col-6 d-flex flex-column justify-content-center">
                             <h3 class="text-primary">
                                 {{ turn }}
@@ -61,7 +62,7 @@
 
                 {% if turn.player == user or turn.player is None or game.one_device_manage %}
                 <div class="mt-3 d-flex justify-content-center">
-                    <form ws-send class="text-center" style="width: 100%; max-width: 320px;">
+                    <form ws-send class="text-center game-keyboard-form">
                         {% csrf_token %}
 
                     <key-board keyboard="{{ keyboard }}" score_left="{{ left_score }}"></key-board>
@@ -69,6 +70,7 @@
                    
                 </div>
                 {% endif %}
+                </div>
             </div>
         </div>
 </div>

@@ -72,6 +72,8 @@ main {
     box-shadow: var(--card-shadow);
     transition: all 0.3s ease;
     overflow: hidden;
+    width: 100%;
+    max-width: 100%;
 }
 
 .card:hover {
@@ -88,6 +90,24 @@ main {
 
 .card-body {
     padding: 2rem;
+}
+
+/* Multiplayer game card layout */
+.game-card-stack {
+    width: 100%;
+    max-width: 520px;
+    margin: 0 auto;
+}
+
+.game-card-row {
+    --bs-gutter-x: 0;
+    margin-left: 0;
+    margin-right: 0;
+}
+
+.game-keyboard-form {
+    width: 100%;
+    max-width: 100%;
 }
 
 /* Button enhancements */
