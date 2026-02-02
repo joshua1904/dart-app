@@ -1,5 +1,6 @@
 from .api import CheckoutHintView
 from .home import HomeView
+from .policy import Policy
 from .single_player.start_game import StartGame
 from .single_player.game import GameView
 from .single_player.result import ResultView
@@ -26,4 +27,5 @@ __all__ = [
     DeleteAccountView.__name__,
     CheckoutHintView.__name__,
     SetNeededDartsView.__name__,
+    Policy.__name__,
 ]

@@ -2,6 +2,7 @@ from django.urls import path
 from django.contrib.auth.decorators import login_required
 
 from main.views.api import SetSinglePlayerCheckoutMissView, SetMultiplayerCheckoutMissView
+
 from .views import (
     HomeView,
     StartGame,
@@ -17,6 +18,7 @@ from .views import (
     DeleteAccountView,
     CheckoutHintView,
     SetNeededDartsView,
+    Policy,
 )
 
 home_urlpatterns = [
@@ -87,4 +89,5 @@ urlpatterns += [
         login_required(DeleteAccountView.as_view()),
         name="delete_account",
     ),
+    path("datenschutz/", Policy.as_view(), name="policy"),
 ]
